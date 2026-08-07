@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS USERS (
                        USER_TYPE        VARCHAR2(20 CHAR) NOT NULL,
                        PHONE            VARCHAR2(20 CHAR) NOT NULL,
                        EMAIL            VARCHAR2(254 CHAR) NOT NULL UNIQUE,
-                       HAS_LOGGED_IN    NUMBER(1) DEFAULT 0 NOT NULL,
                        IS_ACTIVE        NUMBER(1) DEFAULT 1 NOT NULL,
                        VERSION          INTEGER DEFAULT 0 NOT NULL,
                        CONSTRAINT USER_PK PRIMARY KEY (USER_ID),
