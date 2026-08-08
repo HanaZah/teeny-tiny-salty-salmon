@@ -101,4 +101,16 @@ class UserServiceTest {
 
         verify(userRepository, never()).saveAndFlush(any());
     }
+
+    @Test
+    void updateUserProfile_UserMissing_ThrowsSystemIntegrityException() {
+        String missingEmployeeId = "UNKNOWN";
+        UserUpdateDTO updateDTO = new UserUpdateDTO(
+                mockUser.getVersion(), "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
+
+        );
+        when(userRepository.findByEmployeeId(missingEmployeeId)).thenReturn(Optional.empty());
+
+        assertThrows(SystemIntegrityException.class, () -> userService.updateUserProfile(missingEmployeeId, updateDTO));
+    }
 }

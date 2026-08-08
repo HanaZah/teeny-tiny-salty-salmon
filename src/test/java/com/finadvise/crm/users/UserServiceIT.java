@@ -3,6 +3,7 @@ package com.finadvise.crm.users;
 import com.finadvise.crm.AbstractIntegrationTest;
 import com.finadvise.crm.TestFixtureFactory;
 import com.finadvise.crm.common.ResourceVersionMismatchException;
+import com.finadvise.crm.common.SystemIntegrityException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -83,6 +84,18 @@ public class UserServiceIT extends AbstractIntegrationTest {
 
         assertThrows(ResourceVersionMismatchException.class, () ->
                 userService.updateUserProfile(testAdvisor.getEmployeeId(), staleDTO)
+        );
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADV-2")
+    void updateUserProfile_UserMissing_ThrowsException() {
+        UserUpdateDTO updateDTO = new UserUpdateDTO(
+                0, "UpdatedFirst", "UpdatedLast", "+420000111222", "update@finadvise.com"
+        );
+
+        assertThrows(SystemIntegrityException.class, () ->
+                userService.updateUserProfile("IT-ADV-2", updateDTO)
         );
     }
 }
