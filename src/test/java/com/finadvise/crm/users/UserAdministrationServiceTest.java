@@ -35,7 +35,6 @@ class UserAdministrationServiceTest {
     @Mock private Clock clock;
     @Mock private RandomSecureStringGenerator randomSecureStringGenerator;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private EmailSender emailSender; // Kept to satisfy dependency injection, even if unused directly here
     @Mock private ObfuscatedIdGenerator idGenerator;
 
     @InjectMocks

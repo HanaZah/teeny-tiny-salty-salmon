@@ -24,7 +24,6 @@ public class UserAdministrationService {
     private final Clock clock;
     private final RandomSecureStringGenerator randomSecureStringGenerator;
     private final PasswordEncoder passwordEncoder;
-    private final EmailSender emailSender;
     private final ObfuscatedIdGenerator idGenerator;
 
     @Transactional(readOnly = true)
