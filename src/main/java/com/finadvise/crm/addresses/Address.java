@@ -2,7 +2,6 @@ package com.finadvise.crm.addresses;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -43,9 +42,9 @@ public class Address {
     private String houseNumber;
 
     public boolean matches(String targetStreet, String targetHouseNumber, String targetCity, String targetPostalCode) {
-        return this.houseNumber.equals(targetHouseNumber) &&
-                this.street.equals(targetStreet) &&
-                this.city.equals(targetCity) &&
-                this.postalCode.equals(targetPostalCode);
+        return this.houseNumber.equalsIgnoreCase(targetHouseNumber) &&
+                this.street.equalsIgnoreCase(targetStreet) &&
+                this.city.equalsIgnoreCase(targetCity) &&
+                this.postalCode.equalsIgnoreCase(targetPostalCode);
     }
 }
