@@ -84,4 +84,9 @@ class UserService implements UserReadFacade{
         return userMapper.toProfileDto(userRepository.saveAndFlush(user), advisorStats);
     }
 
+    @Override
+    public AdvisorSummaryDTO mapToAdvisorSummary(User user) {
+        return userMapper.toAdvisorSummaryDto(user);
+    }
+
 }

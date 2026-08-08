@@ -65,4 +65,15 @@ class UserMapper {
                 user.isActive()
         );
     }
+
+    AdvisorSummaryDTO toAdvisorSummaryDto(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        return new AdvisorSummaryDTO(
+                user.getEmployeeId(),
+                user.getFirstName(),
+                user.getLastName());
+    }
 }

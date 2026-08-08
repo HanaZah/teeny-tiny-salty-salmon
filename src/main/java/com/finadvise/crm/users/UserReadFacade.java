@@ -7,5 +7,6 @@ import java.util.Optional;
  */
 public interface UserReadFacade {
     Optional<User> findByEmployeeId(String employeeId);
+    AdvisorSummaryDTO mapToAdvisorSummary(User user);
 
 }
