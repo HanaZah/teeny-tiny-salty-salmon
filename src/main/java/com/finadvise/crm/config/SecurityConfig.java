@@ -55,7 +55,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/v1/users/me/set-initial-password").hasAuthority("SETUP_REQUIRED")
                         .requestMatchers("/api/v1/**").hasAnyAuthority("ADVISOR", "ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth

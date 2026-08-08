@@ -37,6 +37,7 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.oracle.database.jdbc:ojdbc11")
 	annotationProcessor("org.projectlombok:lombok")
+	annotationProcessor("org.hibernate.orm:hibernate-processor:7.2.4.Final")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-security-test")

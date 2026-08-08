@@ -52,19 +52,36 @@ public class OpenApiConfig {
     @Bean
     public OpenApiCustomizer globalResponseCustomizer() {
         return openApi -> {
+            Schema<?> problemDetailSchema = ModelConverters.getInstance()
+                    .readAllAsResolvedSchema(ProblemDetail.class).schema;
+
+            MediaType problemDetailMediaType = new MediaType().schema(problemDetailSchema);
+            Content problemDetailContent = new Content()
+                    .addMediaType(
+                            org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            problemDetailMediaType
+                    );
+
             openApi.getPaths().values().forEach(pathItem -> pathItem.readOperations().forEach(operation -> {
+                // Adds ProblemDetail content to all 4xx/5xx responses that don't have any content defined yet
+                operation.getResponses().forEach((statusCode, apiResponse) -> {
+                    if (statusCode.matches("^[45]\\d{2}$") && apiResponse.getContent() == null) {
+                        apiResponse.setContent(problemDetailContent);
+                    }
+                });
+
+                // Omits public endpoints
                 if (operation.getTags() != null && operation.getTags().contains("Authentication")) {
                     return;
                 }
 
+                // Appends global 401/403 for secured endpoints
                 operation.getResponses().addApiResponse("401", new ApiResponse()
-                    .description("Unauthorized - Missing or invalid JWT")
-                    .content(new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
-                            new MediaType().schema(new Schema<ProblemDetail>().$ref("ProblemDetail")))));
+                        .description("Unauthorized - Missing or invalid JWT")
+                        .content(problemDetailContent));
                 operation.getResponses().addApiResponse("403", new ApiResponse()
                         .description("Forbidden - Insufficient access rights")
-                        .content(new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
-                                new MediaType().schema(new Schema<ProblemDetail>().$ref("ProblemDetail")))));
+                        .content(problemDetailContent));
             }));
         };
     }

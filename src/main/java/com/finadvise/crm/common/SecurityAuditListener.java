@@ -1,6 +1,5 @@
 package com.finadvise.crm.common;
 
-import com.finadvise.crm.users.PasswordChangeFailureEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
@@ -30,10 +29,5 @@ class SecurityAuditListener {
         String failureReason = event.getException().getMessage();
 
         log.warn("AUDIT | TYPE: AUTHENTICATION_FAILED | USER: [{}] | REASON: [{}]", attemptedUser, failureReason);
-    }
-
-    @EventListener
-    public void onPasswordChangeFailure(PasswordChangeFailureEvent event) {
-        log.warn("AUDIT | TYPE: PASSWORD_CHANGE_FAILED | USER: [{}] | REASON: [{}]", event.employeeId(), event.reason());
     }
 }

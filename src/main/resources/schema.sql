@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS USERS (
                        LAST_NAME        VARCHAR2(50 CHAR) NOT NULL,
                        USER_TYPE        VARCHAR2(20 CHAR) NOT NULL,
                        PHONE            VARCHAR2(20 CHAR) NOT NULL,
-                       EMAIL            VARCHAR2(254 CHAR) NOT NULL UNIQUE,
+                       EMAIL            VARCHAR2(254 CHAR) NOT NULL,
                        IS_ACTIVE        NUMBER(1) DEFAULT 1 NOT NULL,
                        VERSION          INTEGER DEFAULT 0 NOT NULL,
                        CONSTRAINT USER_PK PRIMARY KEY (USER_ID),
@@ -173,7 +173,7 @@ SELECT
     C.IS_ACTIVE
 FROM CLIENTS C
          JOIN USERS U ON C.ADVISOR_ID = U.USER_ID
-         JOIN ADDRESSES A_C ON C.CONTACT_ADDR_ID   = A_C.ADDRESS_ID;
+         JOIN ADDRESSES A_C ON C.CONTACT_ADDRESS_ID = A_C.ADDRESS_ID;
 /
 
 -- =============================================
@@ -324,16 +324,17 @@ CREATE INDEX IF NOT EXISTS IDX_PRODUCT_MANAGER_FK   ON PRODUCTS (ADVISOR_ID);
 -- 10. SEARCH INDEXES (User Experience)
 -- =============================================
 
-CREATE INDEX IF NOT EXISTS IDX_CLIENT_FIRST_LAST  ON CLIENTS (FIRST_NAME, LAST_NAME);
+CREATE INDEX IF NOT EXISTS IDX_CLIENT_FIRST_LAST        ON CLIENTS (FIRST_NAME, LAST_NAME);
 /
-CREATE INDEX IF NOT EXISTS IDX_ADVISOR_FIRST_LAST ON USERS (FIRST_NAME, LAST_NAME);
+CREATE INDEX IF NOT EXISTS IDX_USER_FIRST_LAST          ON USERS (FIRST_NAME, LAST_NAME);
 /
-
-CREATE UNIQUE INDEX IDX_ADDRESS_LOWER_UN ON ADDRESSES (
-                                                       LOWER(HOUSE_NUMBER),
-                                                       LOWER(STREET),
-                                                       LOWER(CITY),
-                                                       LOWER(POSTAL_CODE)
+CREATE INDEX IF NOT EXISTS IDX_USER_FIRST_LAST_CONCAT   ON USERS (LOWER(FIRST_NAME) || ' ' || LOWER(LAST_NAME));
+/
+CREATE UNIQUE INDEX IF NOT EXISTS IDX_ADDRESS_LOWER_UN  ON ADDRESSES (
+                                                        LOWER(HOUSE_NUMBER),
+                                                        LOWER(STREET),
+                                                        LOWER(CITY),
+                                                        LOWER(POSTAL_CODE)
 );
 /
 
