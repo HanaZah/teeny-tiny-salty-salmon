@@ -8,9 +8,9 @@ public record AddressInputDTO(
         @NotBlank(message = "Street name is required")
         @Size(max = 100)
         @Pattern(
-                regexp = "^[\\p{L}\\p{M}\\s\\-']+$",
+                regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$",
                 message = "Street name contains invalid characters. " +
-                        "Please use only standard letters and basic punctuation."
+                        "Please use only standard letters, digits and basic punctuation."
         )
         String street,
 
@@ -25,9 +25,9 @@ public record AddressInputDTO(
         @NotBlank(message = "City name is required")
         @Size(max = 100)
         @Pattern(
-                regexp = "^[\\p{L}\\p{M}\\s\\-']+$",
+                regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$",
                 message = "City name contains invalid characters." +
-                        "Please use only standard letters, hyphen or apostrophes."
+                        "Please use only standard letters, digits and basic punctuation."
         )
         String city,
 

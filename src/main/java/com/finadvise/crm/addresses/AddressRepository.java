@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface AddressRepository extends JpaRepository<Address, Long> {
+interface AddressRepository extends JpaRepository<Address, Long> {
 
     @Query("SELECT a FROM Address a " +
            "WHERE LOWER(a.street) = LOWER(:street) " +
