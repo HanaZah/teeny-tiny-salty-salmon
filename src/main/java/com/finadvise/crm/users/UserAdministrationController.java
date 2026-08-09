@@ -8,9 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -63,8 +66,16 @@ public class UserAdministrationController {
     })
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDetailDTO registerAdvisor(@Valid @RequestBody UserCreateDTO dto) {
-        return userModificationFacade.registerAdvisor(dto);
+    public ResponseEntity<UserDetailDTO> registerAdvisor(@Valid @RequestBody UserCreateDTO dto) {
+        UserDetailDTO createdAdvisor = userModificationFacade.registerAdvisor(dto);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/api/v1/admin/users/{employeeId}")
+                .buildAndExpand(createdAdvisor.employeeId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(createdAdvisor);
     }
 
     @Operation(
