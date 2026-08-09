@@ -31,7 +31,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
         userRepository.deleteAll();
 
         testAdvisor = TestFixtureFactory.createIntegrationUser(
-                100L, "IT-ADV-1", "hash", UserType.ADVISOR, "12345678"
+                100L, "IT-ADV-1", "hash", UserType.ADVISOR
         );
         userRepository.save(testAdvisor);
 

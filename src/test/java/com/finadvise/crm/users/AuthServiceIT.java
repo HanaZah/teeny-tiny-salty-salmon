@@ -2,7 +2,6 @@ package com.finadvise.crm.users;
 
 import com.finadvise.crm.AbstractIntegrationTest;
 import com.finadvise.crm.TestFixtureFactory;
-import com.finadvise.crm.common.RandomSecureStringGenerator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -25,9 +24,6 @@ public class AuthServiceIT extends AbstractIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RandomSecureStringGenerator randomStringGenerator;
-
     private User testUser;
     private final String RAW_PASSWORD = "RealPassword123!";
 
@@ -40,8 +36,7 @@ public class AuthServiceIT extends AbstractIntegrationTest {
                         998L,
                         "IT-EMP-1",
                         encodedPassword,
-                        UserType.ADVISOR,
-                        randomStringGenerator.generateRandomNumeric(8)
+                        UserType.ADVISOR
                 );
 
         userRepository.save(testUser);

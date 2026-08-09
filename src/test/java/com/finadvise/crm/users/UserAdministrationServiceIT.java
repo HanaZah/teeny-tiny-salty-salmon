@@ -44,12 +44,12 @@ public class UserAdministrationServiceIT extends AbstractIntegrationTest {
         userRepository.save(testAdmin);
 
         testAdvisor = TestFixtureFactory.createIntegrationUser(
-                302L, "IT-ADV-1", passwordEncoder.encode("hash"), UserType.ADVISOR, "11112222"
+                302L, "IT-ADV-1", passwordEncoder.encode("hash"), UserType.ADVISOR
         );
         userRepository.save(testAdvisor);
 
         User testAdvisor2 = TestFixtureFactory.createIntegrationUser(
-                303L, "IT-ADV-2", passwordEncoder.encode("hash"), UserType.ADVISOR, "33334444"
+                303L, "IT-ADV-2", passwordEncoder.encode("hash"), UserType.ADVISOR
         );
         testAdvisor2.setFirstName("UniqueName");
         userRepository.save(testAdvisor2);

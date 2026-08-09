@@ -52,7 +52,7 @@ class UserAdministrationControllerIT extends AbstractIntegrationTest {
         userRepository.save(testAdmin);
 
         testAdvisor = TestFixtureFactory.createIntegrationUser(
-                502L, "IT-ADV-1", passwordEncoder.encode("hash"), UserType.ADVISOR, "22223333"
+                502L, "IT-ADV-1", passwordEncoder.encode("hash"), UserType.ADVISOR
         );
         testAdvisor.setFirstName("SearchableName");
         userRepository.save(testAdvisor);

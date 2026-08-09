@@ -21,10 +21,10 @@ public class TestFixtureFactory {
     }
 
     public static User createIntegrationUser(
-            Long id, String employeeId, String encodedPassword, UserType userType, String ico) {
+            Long id, String employeeId, String encodedPassword, UserType userType) {
         return User.builder()
                 .id(id)
-                .ico(ico)
+                .ico(String.format("1%07d", id % 100000000))
                 .employeeId(employeeId)
                 .passwordHash(encodedPassword)
                 .firstName("Integration")
@@ -37,6 +37,6 @@ public class TestFixtureFactory {
     }
 
     public static User createIntegrationAdmin(Long id, String employeeId, String encodedPassword) {
-        return createIntegrationUser(id, employeeId, encodedPassword, UserType.ADMIN, null);
+        return createIntegrationUser(id, employeeId, encodedPassword, UserType.ADMIN);
     }
 }

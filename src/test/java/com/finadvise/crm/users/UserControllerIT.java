@@ -41,7 +41,7 @@ class UserControllerIT extends AbstractIntegrationTest {
         userRepository.deleteAll();
 
         testUser = TestFixtureFactory.createIntegrationUser(
-                200L, "IT-USR-1", "hash", UserType.ADVISOR, "87654321"
+                200L, "IT-USR-1", "hash", UserType.ADVISOR
         );
         testUser = userRepository.save(testUser);
     }
