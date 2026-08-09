@@ -39,7 +39,6 @@ class ClientProductControllerIT extends AbstractIntegrationTest {
     @Autowired private EntityManager entityManager;
     @Autowired private TransactionTemplate transactionTemplate;
 
-    @Autowired private ProductRepository productRepository;
     @Autowired private ProviderRepository providerRepository;
     @Autowired private ProductTypeRepository productTypeRepository;
     @Autowired private PasswordEncoder passwordEncoder;

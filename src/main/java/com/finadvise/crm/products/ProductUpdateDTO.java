@@ -16,8 +16,8 @@ public record ProductUpdateDTO(
         String name,
 
         @NotNull(message = "Amount is required")
-        @DecimalMin(value = "0.00", inclusive = true, message = "Amount cannot be negative")
-        @DecimalMax(value = "99999999.99", inclusive = true, message = "Amount exceeds maximum limit")
+        @DecimalMin(value = "0.00", message = "Amount cannot be negative")
+        @DecimalMax(value = "99999999.99", message = "Amount exceeds maximum limit")
         @Digits(integer = 8, fraction = 2, message = "Amount must have up to 8 integer digits and 2 fractional digits")
         BigDecimal amount,
 
