@@ -1,7 +1,15 @@
 package com.finadvise.crm;
 
+import com.finadvise.crm.addresses.Address;
+import com.finadvise.crm.clients.Client;
+import com.finadvise.crm.products.Product;
+import com.finadvise.crm.products.ProductType;
+import com.finadvise.crm.products.Provider;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserType;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class TestFixtureFactory {
     public static User createValidUser(String employeeId, UserType userType) {
@@ -33,6 +41,88 @@ public class TestFixtureFactory {
                 .phone("+420111222333")
                 .userType(userType)
                 .isActive(true)
+                .build();
+    }
+
+    public static Client createValidClient(Long id, String clientUid, User advisor) {
+        Address dummyAddress = Address.builder()
+                .id(1L)
+                .street("Test Street")
+                .houseNumber("123/A")
+                .city("Test City")
+                .postalCode("123 45")
+                .build();
+
+        return Client.builder()
+                .id(id)
+                .clientUid(clientUid)
+                .personalId("900101" + String.format("%04d", id % 10000))
+                .birthDate(LocalDate.of(1990, 1, 1))
+                .firstName("John")
+                .lastName("Smith")
+                .occupation("Software Engineer")
+                .phone("+420111222333")
+                .email("client" + id + "@example.com")
+                .idCardNumber(String.format("%09d", id % 1000000000))
+                .idCardIssueDate(LocalDate.of(2020, 1, 1))
+                .idCardExpiryDate(LocalDate.of(2030, 1, 1))
+                .idCardIssuer("MV CR")
+                .lastUpdate(LocalDate.now())
+                .version(0)
+                .isActive(true)
+                .advisor(advisor)
+                .permanentAddress(dummyAddress)
+                .contactAddress(dummyAddress)
+                .build();
+    }
+
+    public static Product createValidProduct(Long id, Client client, User advisor) {
+        ProductType dummyType = ProductType.builder().id(1L).name("DummyProductType").build();
+        Provider dummyProvider = Provider.builder().id(1L).name("DummyProductProvider").build();
+
+        return Product.builder()
+                .id(id)
+                .name("Premium Life Coverage")
+                .amount(new BigDecimal("5000.00"))
+                .startDate(LocalDate.of(2026, 1, 1))
+                .endDate(null)
+                .productType(dummyType)
+                .provider(dummyProvider)
+                .client(client)
+                .advisor(advisor)
+                .build();
+    }
+
+    public static Address createIntegrationAddress(int uniqueHouseNumber) {
+        return Address.builder()
+                .street("Integration Street")
+                .houseNumber(String.valueOf(uniqueHouseNumber % 9999 + 1))
+                .city("Integration City")
+                .postalCode("123 45")
+                .build();
+    }
+
+    public static Client createIntegrationClient(Long id, String clientUid, User advisor, Address address) {
+        return Client.builder()
+                .id(id)
+                .clientUid(clientUid)
+                .personalId(String.format("900101%04d", id % 10000))
+                .birthDate(LocalDate.of(1990, 1, 1))
+                .firstName("Integration")
+                .lastName("Client")
+                .occupation("Test Subject")
+                .phone("+420999888777")
+                .email("int.client" + id + "@finadvise.com")
+                .idCardNumber(String.format("1%08d", id % 100000000))
+                .idCardIssueDate(LocalDate.of(2020, 1, 1))
+                .idCardExpiryDate(LocalDate.now().plusYears(1)) // Dynamically adjusting to avoid time-bomb tests
+                .idCardIssuer("MV CR")
+                .lastUpdate(LocalDate.now())
+                .version(0)
+                .isActive(true)
+                .advisor(advisor)
+                .permanentAddress(address)
+                .contactAddress(address)
                 .build();
     }
 

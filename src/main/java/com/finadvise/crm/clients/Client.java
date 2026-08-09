@@ -1,6 +1,7 @@
 package com.finadvise.crm.clients;
 
 import com.finadvise.crm.addresses.Address;
+import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.users.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -108,5 +109,14 @@ public class Client implements Persistable<Long> {
     @PreUpdate
     protected void onUpdate() {
         this.lastUpdate = LocalDate.now();
+    }
+
+    public void validateEligibilityForNewProduct(LocalDate currentDate) {
+        if (!this.isActive) {
+            throw new InvalidInputValueException("Cannot arrange product: Client is inactive.");
+        }
+        if (this.idCardExpiryDate.isBefore(currentDate)) {
+            throw new InvalidInputValueException("Cannot arrange product: Client ID card expired.");
+        }
     }
 }
