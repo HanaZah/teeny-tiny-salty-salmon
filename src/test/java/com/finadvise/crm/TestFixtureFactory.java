@@ -75,7 +75,7 @@ public class TestFixtureFactory {
                 .version(0)
                 .isActive(true)
                 .advisor(advisor)
-                .permanentAddress(dummyAddress)
+                .residentialAddress(dummyAddress)
                 .contactAddress(dummyAddress)
                 .build();
     }
@@ -125,7 +125,7 @@ public class TestFixtureFactory {
                 .version(0)
                 .isActive(true)
                 .advisor(advisor)
-                .permanentAddress(address)
+                .residentialAddress(address)
                 .contactAddress(address)
                 .build();
     }

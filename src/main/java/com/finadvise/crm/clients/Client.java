@@ -82,7 +82,7 @@ public class Client implements Persistable<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RESIDENT_ADDRESS_ID", nullable = false)
-    private Address permanentAddress;
+    private Address residentialAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CONTACT_ADDRESS_ID", nullable = false)
