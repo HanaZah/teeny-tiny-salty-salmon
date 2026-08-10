@@ -119,4 +119,10 @@ public class Client implements Persistable<Long> {
             throw new InvalidInputValueException("Cannot arrange product: Client ID card expired.");
         }
     }
+
+    public void validateEligibilityForUpdate() {
+        if (!this.isActive) {
+            throw new InvalidInputValueException("Cannot update client: Client is inactive.");
+        }
+    }
 }

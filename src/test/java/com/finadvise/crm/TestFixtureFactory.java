@@ -1,6 +1,10 @@
 package com.finadvise.crm;
 
 import com.finadvise.crm.addresses.Address;
+import com.finadvise.crm.budget.Expense;
+import com.finadvise.crm.budget.ExpenseType;
+import com.finadvise.crm.budget.Income;
+import com.finadvise.crm.budget.IncomeType;
 import com.finadvise.crm.clients.Client;
 import com.finadvise.crm.products.Product;
 import com.finadvise.crm.products.ProductType;
@@ -128,5 +132,53 @@ public class TestFixtureFactory {
 
     public static User createIntegrationAdmin(Long id, String employeeId, String encodedPassword) {
         return createIntegrationUser(id, employeeId, encodedPassword, UserType.ADMIN);
+    }
+
+    public static Income createValidIncome(Long typeId, String typeName, Integer amount, Client client) {
+        IncomeType type = IncomeType.builder()
+                .id(typeId)
+                .name(typeName)
+                .build();
+
+        return Income.builder()
+                .id(typeId * 100) // Arbitrary mock ID
+                .amount(amount)
+                .incomeType(type)
+                .client(client)
+                .build();
+    }
+
+    public static Expense createValidExpense(Long typeId, String typeName, Integer amount, boolean isMandatory, Client client) {
+        ExpenseType type = ExpenseType.builder()
+                .id(typeId)
+                .name(typeName)
+                .build();
+
+        return Expense.builder()
+                .id(typeId * 100) // Arbitrary mock ID
+                .amount(amount)
+                .isMandatory(isMandatory)
+                .expenseType(type)
+                .client(client)
+                .build();
+    }
+
+    public static Income createIntegrationIncome(Client client, IncomeType type, Integer amount) {
+        return Income.builder()
+                // ID intentionally omitted so @GeneratedValue can work natively
+                .amount(amount)
+                .incomeType(type)
+                .client(client)
+                .build();
+    }
+
+    public static Expense createIntegrationExpense(Client client, ExpenseType type, Integer amount, boolean isMandatory) {
+        return Expense.builder()
+                // ID intentionally omitted so @GeneratedValue can work natively
+                .amount(amount)
+                .isMandatory(isMandatory)
+                .expenseType(type)
+                .client(client)
+                .build();
     }
 }
