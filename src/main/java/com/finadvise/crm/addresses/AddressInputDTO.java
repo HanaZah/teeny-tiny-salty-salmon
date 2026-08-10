@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 
 public record AddressInputDTO(
         @NotBlank(message = "Street name is required")
-        @Size(max = 100)
+        @Size(max = 100, message = "Street name must be at most 100 characters long")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$",
                 message = "Street name contains invalid characters. " +
@@ -15,7 +15,7 @@ public record AddressInputDTO(
         String street,
 
         @NotBlank(message = "House number is required")
-        @Size(max = 10)
+        @Size(max = 10, message = "House number must be at most 10 characters long")
         @Pattern(
                 regexp = "^[1-9]\\d{0,3}(/[1-9]\\d{0,3}[a-z]?)?$",
                 message = "Invalid Czech house number format (e.g., 1234 or 1234/15a)."
@@ -23,7 +23,7 @@ public record AddressInputDTO(
         String houseNumber,
 
         @NotBlank(message = "City name is required")
-        @Size(max = 100)
+        @Size(max = 100, message = "City name must be at most 100 characters long")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$",
                 message = "City name contains invalid characters." +
