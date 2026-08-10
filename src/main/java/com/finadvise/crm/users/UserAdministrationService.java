@@ -116,7 +116,7 @@ public class UserAdministrationService {
                 ? request.name().trim().toLowerCase()
                 : "";
 
-        return userRepository.findActiveAdvisorSuggestions(normalizedName, request.limit());
+        return userRepository.findAdvisorSuggestions(normalizedName, request.limit());
     }
 
     @Transactional

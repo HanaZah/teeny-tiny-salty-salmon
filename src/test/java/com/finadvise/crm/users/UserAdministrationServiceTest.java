@@ -232,7 +232,7 @@ class UserAdministrationServiceTest {
         AdvisorSuggestionRequestDTO request = new AdvisorSuggestionRequestDTO("Doe", 10);
         AdvisorSuggestionResultDTO suggestion = new AdvisorSuggestionResultDTO("EMP-123", "John Doe");
 
-        when(userRepository.findActiveAdvisorSuggestions("doe", 10)).thenReturn(List.of(suggestion));
+        when(userRepository.findAdvisorSuggestions("doe", 10)).thenReturn(List.of(suggestion));
 
         List<AdvisorSuggestionResultDTO> results = adminService.getAdvisorSuggestions(request);
 
@@ -244,13 +244,13 @@ class UserAdministrationServiceTest {
     void getAdvisorSuggestions_NullName_NormalizesAndReturnsList() {
         AdvisorSuggestionRequestDTO request = new AdvisorSuggestionRequestDTO(null, 5);
 
-        when(userRepository.findActiveAdvisorSuggestions("", 5)).thenReturn(List.of());
+        when(userRepository.findAdvisorSuggestions("", 5)).thenReturn(List.of());
 
         List<AdvisorSuggestionResultDTO> results = adminService.getAdvisorSuggestions(request);
 
         assertNotNull(results);
         assertTrue(results.isEmpty());
-        verify(userRepository).findActiveAdvisorSuggestions("", 5);
+        verify(userRepository).findAdvisorSuggestions("", 5);
     }
 
     // --- UPDATE USER EMAIL ---

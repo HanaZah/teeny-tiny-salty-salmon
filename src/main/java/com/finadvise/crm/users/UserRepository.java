@@ -63,7 +63,6 @@ interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExec
         )
         FROM User u
         WHERE u.userType = :userType
-          AND u.isActive = true
           AND LOWER(u.firstName) || ' ' || LOWER(u.lastName) LIKE LOWER(CONCAT('%', :name, '%'))
     """)
     List<AdvisorSuggestionResultDTO> findUserSuggestions(
@@ -72,7 +71,7 @@ interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExec
             Limit limit
     );
 
-    default List<AdvisorSuggestionResultDTO> findActiveAdvisorSuggestions(String name, int limit) {
+    default List<AdvisorSuggestionResultDTO> findAdvisorSuggestions(String name, int limit) {
         // Fallback to empty string if name is null to prevent NPE in the LIKE clause
         String safeName = name != null ? name : "";
         return findUserSuggestions(safeName, UserType.ADVISOR, Limit.of(limit));

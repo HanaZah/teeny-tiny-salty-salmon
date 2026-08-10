@@ -110,7 +110,7 @@ public class UserAdministrationController {
 
     @Operation(
             summary = "Get advisor autocomplete suggestions",
-            description = "Admin-restricted endpoint for fetching active advisor name suggestions."
+            description = "Admin-restricted endpoint for fetching advisor name suggestions."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Suggestions retrieved successfully"),
