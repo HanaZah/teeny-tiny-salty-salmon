@@ -37,7 +37,10 @@ public class ProductController {
         return productService.updateProduct(id, dto, principal.getName());
     }
 
-    @Operation(summary = "Search products", description = "Authenticated user endpoint for product search.")
+    @Operation(
+            summary = "Search products",
+            description = "Authenticated user endpoint for product search. "
+                    + "Searches all products for admin but only owned products (or client-owned products) for advisor.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Products found successfully"),
             @ApiResponse(responseCode = "400", description = "Validation failed, incorrect payload format"),
