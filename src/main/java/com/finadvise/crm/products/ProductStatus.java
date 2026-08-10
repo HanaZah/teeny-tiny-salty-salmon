@@ -1,8 +1,10 @@
 package com.finadvise.crm.products;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 enum ProductStatus {
     ACTIVE("Aktivní"),
     EXPIRED("Expirované"),
@@ -10,8 +12,4 @@ enum ProductStatus {
     ALL("Všechny");
 
     private final String label;
-
-    ProductStatus(String label) {
-        this.label = label;
-    }
 }
