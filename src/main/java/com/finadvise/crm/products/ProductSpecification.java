@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductSpecification {
+class ProductSpecification {
 
     private ProductSpecification() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
