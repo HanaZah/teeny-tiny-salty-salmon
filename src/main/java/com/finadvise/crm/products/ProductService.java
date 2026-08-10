@@ -71,7 +71,8 @@ class ProductService {
                 clientReadFacade.mapToClientSummary(product.getClient()));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ADVISOR') and (hasAuthority('ADMIN') == #isAdmin)")
+    @PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN') and #employeeId == authentication.name" +
+            " and (hasAuthority('ADMIN') == #isAdmin)")
     @Transactional(readOnly = true)
     public Page<ProductDTO> searchProducts(
             ProductSearchCriteriaDTO criteria, Pageable pageable, String employeeId, boolean isAdmin) {
