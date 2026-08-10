@@ -39,7 +39,7 @@ class AuthControllerIT extends AbstractIntegrationTest {
     private User testAdmin;
     @BeforeAll
     void setUpAll() {
-        userRepository.deleteAll();
+        cleanDatabase();
         User testUser = TestFixtureFactory.createIntegrationUser(
                 888L,
                 "IT-EMP-1",

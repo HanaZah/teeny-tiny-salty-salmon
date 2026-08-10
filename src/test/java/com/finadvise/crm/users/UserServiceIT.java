@@ -28,7 +28,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
 
     @BeforeAll
     void setUpAll() {
-        userRepository.deleteAll();
+        cleanDatabase();
 
         testAdvisor = TestFixtureFactory.createIntegrationUser(
                 100L, "IT-ADV-1", "hash", UserType.ADVISOR

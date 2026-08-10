@@ -38,7 +38,7 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @BeforeAll
     void setUpAll() {
-        userRepository.deleteAll();
+        cleanDatabase();
 
         testUser = TestFixtureFactory.createIntegrationUser(
                 200L, "IT-USR-1", "hash", UserType.ADVISOR

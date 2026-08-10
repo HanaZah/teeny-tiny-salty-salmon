@@ -44,7 +44,7 @@ class UserAdministrationControllerIT extends AbstractIntegrationTest {
 
     @BeforeAll
     void setUpAll() {
-        userRepository.deleteAll();
+        cleanDatabase();
 
         testAdmin = TestFixtureFactory.createIntegrationAdmin(
                 501L, "IT-ADM-1", passwordEncoder.encode("hash")

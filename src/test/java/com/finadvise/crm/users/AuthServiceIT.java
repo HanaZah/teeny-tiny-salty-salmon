@@ -29,7 +29,7 @@ public class AuthServiceIT extends AbstractIntegrationTest {
 
     @BeforeAll
     void setUpAll() {
-        userRepository.deleteAll();
+        cleanDatabase();
         String encodedPassword = passwordEncoder.encode(RAW_PASSWORD);
 
         testUser = TestFixtureFactory.createIntegrationUser(
