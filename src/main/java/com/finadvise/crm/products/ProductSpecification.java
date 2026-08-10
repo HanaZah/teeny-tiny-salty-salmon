@@ -22,14 +22,17 @@ class ProductSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            boolean hasAdvisor = criteria.advisorEmployeeId() != null && !criteria.advisorEmployeeId().isBlank();
-            boolean hasClient = criteria.clientUid() != null && !criteria.clientUid().isBlank();
+            String advisorId = criteria.advisorEmployeeId() == null? null : criteria.advisorEmployeeId().trim();
+            String clientUid = criteria.clientUid() == null? null : criteria.clientUid().trim();
+            String productName = criteria.productName() == null? null : criteria.productName().trim();
+
+            boolean hasAdvisor = advisorId != null && !advisorId.isBlank();
+            boolean hasClient = advisorId != null && !advisorId.isBlank();
 
             if (hasAdvisor && hasClient) {
-                String advisorId = criteria.advisorEmployeeId().trim();
                 Predicate clientMatch = cb.equal(
                         root.get(Product_.client).get(Client_.clientUid),
-                        criteria.clientUid().trim()
+                        clientUid
                 );
 
                 // Explicit LEFT JOIN prevents implicit INNER JOIN from dropping external products
@@ -50,19 +53,19 @@ class ProductSpecification {
                 // General product search: strictly limited to products the advisor manages directly
                 predicates.add(cb.equal(
                         root.get(Product_.advisor).get(User_.employeeId),
-                        criteria.advisorEmployeeId().trim()
+                        advisorId
                 ));
 
             } else if (hasClient) {
                 // Admin search (no advisor filter): strictly match the client
                 predicates.add(cb.equal(
                         root.get(Product_.client).get(Client_.clientUid),
-                        criteria.clientUid().trim()
+                        clientUid
                 ));
             }
 
-            if (criteria.productName() != null && !criteria.productName().isBlank()) {
-                String pattern = "%" + criteria.productName().trim().toLowerCase() + "%";
+            if (productName != null && !productName.isBlank()) {
+                String pattern = "%" + productName.toLowerCase() + "%";
                 predicates.add(cb.like(cb.lower(root.get(Product_.name)), pattern));
             }
 
