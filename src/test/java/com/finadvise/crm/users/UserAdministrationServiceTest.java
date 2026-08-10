@@ -98,7 +98,7 @@ class UserAdministrationServiceTest {
 
     @Test
     void searchUsers_ValidCriteria_ReturnsPage() {
-        UserSearchCriteriaDTO criteria = new UserSearchCriteriaDTO("Doe", null, true);
+        UserSearchCriteriaDTO criteria = new UserSearchCriteriaDTO("Doe", null, UserStatus.ACTIVE);
         Page<User> userPage = new PageImpl<>(List.of(mockAdvisor));
         UserSearchResultDTO searchResultDTO = new UserSearchResultDTO(
                 mockAdvisor.getEmployeeId(), mockAdvisor.getFirstName(),

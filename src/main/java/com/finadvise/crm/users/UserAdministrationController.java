@@ -48,8 +48,16 @@ public class UserAdministrationController {
         return userService.getOrphanedPortfolios();
     }
 
+    @Operation(
+            summary = "Search users",
+            description = "Admin-restricted endpoint for searching users."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation failed, incorrect request parameters format"),
+    })
     @GetMapping // Spring will automatically map request parameters to UserSearchCriteriaDTO
-    public Page<UserSearchResultDTO> searchUsers(UserSearchCriteriaDTO criteria, Pageable pageable) {
+    public Page<UserSearchResultDTO> searchUsers(@Valid UserSearchCriteriaDTO criteria, Pageable pageable) {
         return userService.searchUsers(criteria, pageable);
     }
 

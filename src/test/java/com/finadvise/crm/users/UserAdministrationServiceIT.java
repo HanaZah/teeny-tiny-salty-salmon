@@ -203,7 +203,7 @@ public class UserAdministrationServiceIT extends AbstractIntegrationTest {
     @Test
     @WithMockUser(username = "IT-ADM-1", authorities = "ADMIN")
     void searchUsers_ValidCriteria_ReturnsFilteredPage() {
-        UserSearchCriteriaDTO criteria = new UserSearchCriteriaDTO("UniqueName", null, true);
+        UserSearchCriteriaDTO criteria = new UserSearchCriteriaDTO("UniqueName", null, UserStatus.ACTIVE);
 
         Page<UserSearchResultDTO> result = adminService.searchUsers(criteria, Pageable.unpaged());
 
@@ -214,7 +214,7 @@ public class UserAdministrationServiceIT extends AbstractIntegrationTest {
     @Test
     @WithMockUser(username = "IT-ADM-1", authorities = "ADMIN")
     void searchUsers_NoMatch_ReturnsEmptyPage() {
-        UserSearchCriteriaDTO criteria = new UserSearchCriteriaDTO("NobodyByThisName", null, true);
+        UserSearchCriteriaDTO criteria = new UserSearchCriteriaDTO("NobodyByThisName", null, UserStatus.ACTIVE);
 
         Page<UserSearchResultDTO> result = adminService.searchUsers(criteria, Pageable.unpaged());
 

@@ -14,9 +14,11 @@ public class UserSpecification {
     public static Specification<User> build(UserSearchCriteriaDTO criteria) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            String name = criteria.name() == null ? null : criteria.name().trim();
+            String ico = criteria.ico() == null ? null : criteria.ico().trim();
 
-            if (criteria.name() != null && !criteria.name().isBlank()) {
-                String pattern = "%" + criteria.name().trim().toLowerCase() + "%";
+            if (name != null && !name.isBlank()) {
+                String pattern = "%" + name.toLowerCase() + "%";
                 Expression<String> fullName = cb.concat(
                         cb.concat(cb.lower(root.get(User_.firstName)), " "),
                         cb.lower(root.get(User_.lastName))
@@ -25,12 +27,15 @@ public class UserSpecification {
                 predicates.add(cb.like(fullName, pattern));
             }
 
-            if (criteria.ico() != null && !criteria.ico().isBlank()) {
-                predicates.add(cb.equal(root.get(User_.ico), criteria.ico()));
+            if (ico != null && !ico.isBlank()) {
+                predicates.add(cb.equal(root.get(User_.ico), ico));
             }
 
             if (criteria.status() != null) {
-                predicates.add(cb.equal(root.get(User_.isActive), criteria.status()));
+                switch (criteria.status()) {
+                    case ACTIVE -> predicates.add(cb.equal(root.get(User_.isActive), true));
+                    case INACTIVE -> predicates.add(cb.equal(root.get(User_.isActive), false));
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
