@@ -1,7 +1,11 @@
 package com.finadvise.crm.common;
 
+import com.finadvise.crm.addresses.AddressValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -91,7 +95,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({ResourceVersionMismatchException.class, ObjectOptimisticLockingFailureException.class})
-    public ProblemDetail handleVersionMismatchException() {
+    public ProblemDetail handleVersionMismatch() {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.CONFLICT,
                 "The record was modified by another transaction. Please refresh and retry."
@@ -102,8 +106,8 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(InvalidInputValueException.class)
-    public ProblemDetail handleInvalidInputValueException(InvalidInputValueException e) {
+    @ExceptionHandler({InvalidInputValueException.class, AddressValidationException.class})
+    public ProblemDetail handleInvalidInputValue(Exception e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 e.getMessage()
@@ -135,6 +139,45 @@ public class GlobalExceptionHandler {
         );
         problemDetail.setTitle("Resource Conflict");
         problemDetail.setType(URI.create(ErrorCodes.RESOURCE_CONFLICT));
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ProblemDetail handleConstraintViolationException(ConstraintViolationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "The request parameters contain validation errors."
+        );
+        problemDetail.setTitle("Validation Failed");
+        problemDetail.setType(URI.create(ErrorCodes.VALIDATION_FAILED));
+
+        Map<String, String> constraintErrors = ex.getConstraintViolations()
+                .stream()
+                .collect(Collectors.toMap(
+                        v -> {
+                            String path = v.getPropertyPath().toString();
+                            // Strip method name prefix if present (e.g. "getRecentClientOverviews.limit" -> "limit")
+                            int lastDot = path.lastIndexOf('.');
+                            return lastDot != -1 ? path.substring(lastDot + 1) : path;
+                        },
+                        ConstraintViolation::getMessage,
+                        (existing, replacement) -> existing
+                ));
+
+        problemDetail.setProperty("invalid_params", constraintErrors);
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadableException() {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Malformed JSON request body."
+        );
+        problemDetail.setTitle("Bad Request");
+        problemDetail.setType(URI.create(ErrorCodes.VALIDATION_FAILED));
 
         return problemDetail;
     }
