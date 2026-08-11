@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.ObjectMapper;
 
@@ -82,19 +83,15 @@ class ClientControllerIT extends AbstractIntegrationTest {
         });
     }
 
-    private org.springframework.test.web.servlet.request.RequestPostProcessor adminJwt() {
+    private RequestPostProcessor adminJwt() {
         return jwt().jwt(j -> j.subject(testAdmin.getEmployeeId())).authorities(new SimpleGrantedAuthority("ADMIN"));
     }
 
-    private org.springframework.test.web.servlet.request.RequestPostProcessor advisor1Jwt() {
+    private RequestPostProcessor advisor1Jwt() {
         return jwt().jwt(j -> j.subject(testAdvisor1.getEmployeeId())).authorities(new SimpleGrantedAuthority("ADVISOR"));
     }
 
-    private org.springframework.test.web.servlet.request.RequestPostProcessor advisor2Jwt() {
-        return jwt().jwt(j -> j.subject(testAdvisor2.getEmployeeId())).authorities(new SimpleGrantedAuthority("ADVISOR"));
-    }
-
-    private org.springframework.test.web.servlet.request.RequestPostProcessor emptyAdvisorJwt() {
+    private RequestPostProcessor emptyAdvisorJwt() {
         return jwt().jwt(j -> j.subject(emptyAdvisor.getEmployeeId())).authorities(new SimpleGrantedAuthority("ADVISOR"));
     }
 
