@@ -35,7 +35,7 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
             @ApiResponse(responseCode = "400", description = "Validation failed, incorrect payload format"),
-            @ApiResponse(responseCode = "409", description = "Version mismatch (Optimistic locking failure)"),
+            @ApiResponse(responseCode = "409", description = "Version mismatch (Optimistic locking failure) or unique value conflict"),
             @ApiResponse(responseCode = "500", description = "Critical failure, authenticated user record missing")
     })
     @PutMapping("/me/profile")

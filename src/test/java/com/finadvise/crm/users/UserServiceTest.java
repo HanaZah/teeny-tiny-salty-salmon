@@ -1,6 +1,7 @@
 package com.finadvise.crm.users;
 
 import com.finadvise.crm.TestFixtureFactory;
+import com.finadvise.crm.common.ResourceConflictException;
 import com.finadvise.crm.common.ResourceVersionMismatchException;
 import com.finadvise.crm.common.SystemIntegrityException;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ class UserServiceTest {
         when(mockProjection.getActiveClients()).thenReturn(5);
         when(mockProjection.getActiveProducts()).thenReturn(10);
         UserUpdateDTO updateDTO = new UserUpdateDTO(
-                mockUser.getVersion(), "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
+                mockUser.getVersion(), mockUser.getIco(), "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
         );
 
         when(userRepository.findByEmployeeId(mockUser.getEmployeeId())).thenReturn(Optional.of(mockUser));
@@ -88,9 +89,9 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUserProfile_VersionMismatch_ThrowsConflictException() {
+    void updateUserProfile_VersionMismatch_ThrowsVersionMismatchException() {
         UserUpdateDTO updateDTO = new UserUpdateDTO(
-                mockUser.getVersion() + 1, "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
+                mockUser.getVersion() + 1, mockUser.getIco(), "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
         );
 
         when(userRepository.findByEmployeeId(mockUser.getEmployeeId())).thenReturn(Optional.of(mockUser));
@@ -103,10 +104,26 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserProfile_DuplicitIco_ThrowsConflictException() {
+        String existingIco = "12345678";
+        UserUpdateDTO updateDTO = new UserUpdateDTO(
+                mockUser.getVersion(), existingIco, "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
+        );
+
+        when(userRepository.findByEmployeeId(mockUser.getEmployeeId())).thenReturn(Optional.of(mockUser));
+        when(userRepository.existsByIco(existingIco)).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class, () ->
+                userService.updateUserProfile(mockUser.getEmployeeId(), updateDTO));
+
+        verify(userRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void updateUserProfile_UserMissing_ThrowsSystemIntegrityException() {
         String missingEmployeeId = "UNKNOWN";
         UserUpdateDTO updateDTO = new UserUpdateDTO(
-                mockUser.getVersion(), "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
+                mockUser.getVersion(), mockUser.getIco(), "Jane", "Smith", "+420987654321", "jane.smith@finadvise.com"
 
         );
         when(userRepository.findByEmployeeId(missingEmployeeId)).thenReturn(Optional.empty());

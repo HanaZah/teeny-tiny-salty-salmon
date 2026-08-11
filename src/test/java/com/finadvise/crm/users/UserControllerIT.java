@@ -34,28 +34,34 @@ class UserControllerIT extends AbstractIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User testUser;
+    private User testUser1;
+    private User testUser2;
 
     @BeforeAll
     void setUpAll() {
         cleanDatabase();
 
-        testUser = TestFixtureFactory.createIntegrationUser(
+        testUser1 = TestFixtureFactory.createIntegrationUser(
                 200L, "IT-USR-1", "hash", UserType.ADVISOR
         );
-        testUser = userRepository.save(testUser);
+        testUser1 = userRepository.save(testUser1);
+
+        testUser2 = TestFixtureFactory.createIntegrationUser(
+                201L, "IT-USR-2", "hash", UserType.ADVISOR
+        );
+        testUser2 = userRepository.save(testUser2);
     }
 
     @Test
     void getCurrentUser_Authenticated_Returns200AndProfile() throws Exception {
         mockMvc.perform(get("/api/v1/users/me")
                 .with(jwt()
-                        .jwt(j -> j.subject(testUser.getEmployeeId()))
+                        .jwt(j -> j.subject(testUser1.getEmployeeId()))
                         .authorities(new SimpleGrantedAuthority("ADVISOR"))
                 ))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.employeeId").value(testUser.getEmployeeId()))
-                .andExpect(jsonPath("$.firstName").value(testUser.getFirstName()));
+                .andExpect(jsonPath("$.employeeId").value(testUser1.getEmployeeId()))
+                .andExpect(jsonPath("$.firstName").value(testUser1.getFirstName()));
     }
 
     @Test
@@ -66,17 +72,17 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @Test
     void updateProfile_ValidPayload_Returns200AndUpdatedProfile() throws Exception {
-        Integer currentVersion = userRepository.findByEmployeeId(testUser.getEmployeeId()).orElseThrow().getVersion();
+        Integer currentVersion = userRepository.findByEmployeeId(testUser1.getEmployeeId()).orElseThrow().getVersion();
 
         String updatedFirst = "NewFirst";
         String updatedEmail = "new@finadvise.com";
         UserUpdateDTO request = new UserUpdateDTO(
-                currentVersion, updatedFirst, "NewLast", "+420999888777", updatedEmail
+                currentVersion, testUser1.getIco(), updatedFirst, "NewLast", "+420999888777", updatedEmail
         );
 
         mockMvc.perform(put("/api/v1/users/me/profile")
                         .with(jwt()
-                                .jwt(j -> j.subject(testUser.getEmployeeId()))
+                                .jwt(j -> j.subject(testUser1.getEmployeeId()))
                                 .authorities(new SimpleGrantedAuthority("ADVISOR"))
                         )
                 .contentType(MediaType.APPLICATION_JSON)
@@ -89,12 +95,12 @@ class UserControllerIT extends AbstractIntegrationTest {
     @Test
     void updateProfile_MissingVersion_Returns400() throws Exception {
         UserUpdateDTO request = new UserUpdateDTO(
-                null, "NewFirst", "NewLast", "+420999888777", "new@finadvise.com"
+                null, testUser1.getIco(), "NewFirst", "NewLast", "+420999888777", "new@finadvise.com"
         );
 
         mockMvc.perform(put("/api/v1/users/me/profile")
                         .with(jwt()
-                                .jwt(j -> j.subject(testUser.getEmployeeId()))
+                                .jwt(j -> j.subject(testUser1.getEmployeeId()))
                                 .authorities(new SimpleGrantedAuthority("ADVISOR"))
                         )
                 .contentType(MediaType.APPLICATION_JSON)
@@ -106,15 +112,15 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @Test
     void updateProfile_InvalidNameCharacters_Returns400() throws Exception {
-        Integer currentVersion = userRepository.findByEmployeeId(testUser.getEmployeeId()).orElseThrow().getVersion();
+        Integer currentVersion = userRepository.findByEmployeeId(testUser1.getEmployeeId()).orElseThrow().getVersion();
 
         UserUpdateDTO request = new UserUpdateDTO(
-                currentVersion, "H@cker!", "Name", "+420999888777", "new@finadvise.com"
+                currentVersion, testUser1.getIco(), "H@cker!", "Name", "+420999888777", "new@finadvise.com"
         );
 
         mockMvc.perform(put("/api/v1/users/me/profile")
                         .with(jwt()
-                                .jwt(j -> j.subject(testUser.getEmployeeId()))
+                                .jwt(j -> j.subject(testUser1.getEmployeeId()))
                                 .authorities(new SimpleGrantedAuthority("ADVISOR"))
                         )
                 .contentType(MediaType.APPLICATION_JSON)
@@ -126,16 +132,33 @@ class UserControllerIT extends AbstractIntegrationTest {
     @Test
     void updateProfile_VersionMismatch_Returns409() throws Exception {
         UserUpdateDTO request = new UserUpdateDTO(
-                999, "NewFirst", "NewLast", "+420999888777", "new@finadvise.com"
+                999, testUser1.getIco(), "NewFirst", "NewLast", "+420999888777", "new@finadvise.com"
         );
 
         mockMvc.perform(put("/api/v1/users/me/profile")
                         .with(jwt()
-                                .jwt(j -> j.subject(testUser.getEmployeeId()))
+                                .jwt(j -> j.subject(testUser1.getEmployeeId()))
                                 .authorities(new SimpleGrantedAuthority("ADVISOR"))
                         )
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").value(ErrorCodes.VERSION_MISMATCH));
+    }
+
+    @Test
+    void updateProfile_DuplicitIco_Returns409() throws Exception {
+        UserUpdateDTO request = new UserUpdateDTO(
+                999, testUser2.getIco(), "NewFirst", "NewLast", "+420999888777", "new@finadvise.com"
+        );
+
+        mockMvc.perform(put("/api/v1/users/me/profile")
+                        .with(jwt()
+                                .jwt(j -> j.subject(testUser1.getEmployeeId()))
+                                .authorities(new SimpleGrantedAuthority("ADVISOR"))
+                        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.type").value(ErrorCodes.VERSION_MISMATCH));
     }

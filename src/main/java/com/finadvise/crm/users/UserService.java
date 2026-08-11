@@ -1,5 +1,6 @@
 package com.finadvise.crm.users;
 
+import com.finadvise.crm.common.ResourceConflictException;
 import com.finadvise.crm.common.ResourceVersionMismatchException;
 import com.finadvise.crm.common.SystemIntegrityException;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +67,11 @@ class UserService implements UserReadFacade{
                     "Please refresh and retry.");
         }
 
+        if (!Objects.equals(dto.ico(), user.getIco()) && userRepository.existsByIco(dto.ico())) {
+            throw new ResourceConflictException("User with this IČO already exists.");
+        }
+
+        user.setIco(dto.ico());
         user.setFirstName(dto.firstName());
         user.setLastName(dto.lastName());
         user.setEmail(dto.email());

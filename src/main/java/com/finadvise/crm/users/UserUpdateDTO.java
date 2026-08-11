@@ -6,6 +6,11 @@ public record UserUpdateDTO(
         @NotNull(message = "Version is required for concurrency control")
         Integer version,
 
+        @NotBlank(message = "IČO is required")
+        @Size(max = 8, min = 8, message = "IČO must be exactly 8 characters long")
+        @Pattern(regexp = "^\\d{8}", message = "IČO must contain exactly 8 digits")
+        String ico,
+
         @NotBlank(message = "First name is required")
         @Size(max = 50, message = "First name must be at most 50 characters long")
         @Pattern(
