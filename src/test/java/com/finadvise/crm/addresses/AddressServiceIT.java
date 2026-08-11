@@ -25,7 +25,7 @@ class AddressServiceIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        addressRepository.deleteAll();
+        cleanDatabase();
     }
 
     @Test
