@@ -41,6 +41,12 @@ class AddressService implements AddressFacade {
         return addressMapper.toDto(address);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Address getReferenceById(Long id) {
+        return addressRepository.getReferenceById(id);
+    }
+
     private AddressDTO attemptCreateWithFallback(AddressInputDTO dto) {
         try {
             Address newAddress = addressMapper.toEntity(dto);

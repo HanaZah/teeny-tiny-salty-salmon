@@ -190,11 +190,11 @@ DECLARE
     v_usr_role VARCHAR2(50 CHAR);
 BEGIN
     :NEW.LAST_UPDATE := TRUNC(SYSDATE);
-    IF :NEW.BIRTH_DATE > ADD_MONTHS(TRUNC(SYSDATE), -12*18) THEN
-        raise_application_error(-20001, 'Client must be at least 18 years old.');
+    IF :NEW.ID_CARD_ISSUE_DATE <= :NEW.BIRTH_DATE THEN
+        raise_application_error(-20001, 'Client ID card issue date cannot precede or match birth date');
     END IF;
-    IF :NEW.ID_CARD_EXPIRY_DATE < TRUNC(SYSDATE) THEN
-        raise_application_error(-20002, 'Client ID card expired.');
+    IF :NEW.ID_CARD_EXPIRY_DATE < TRUNC(SYSDATE) OR :NEW.ID_CARD_EXPIRY_DATE <= :NEW.ID_CARD_ISSUE_DATE THEN
+        raise_application_error(-20002, 'Client ID card expired or the expiry date is invalid (not after issue date).');
     END IF;
     IF :NEW.ID_CARD_ISSUE_DATE > TRUNC(SYSDATE) THEN
         raise_application_error(-20003, 'Client ID card issue date cannot be in the future.');
@@ -326,10 +326,6 @@ CREATE INDEX IF NOT EXISTS IDX_PRODUCT_MANAGER_FK   ON PRODUCTS (ADVISOR_ID);
 -- 10. SEARCH INDEXES (User Experience)
 -- =============================================
 
-CREATE INDEX IF NOT EXISTS IDX_CLIENT_FIRST_LAST        ON CLIENTS (FIRST_NAME, LAST_NAME);
-/
-CREATE INDEX IF NOT EXISTS IDX_USER_FIRST_LAST          ON USERS (FIRST_NAME, LAST_NAME);
-/
 CREATE INDEX IF NOT EXISTS IDX_USER_FIRST_LAST_CONCAT   ON USERS (LOWER(FIRST_NAME) || ' ' || LOWER(LAST_NAME));
 /
 CREATE UNIQUE INDEX IF NOT EXISTS IDX_ADDRESS_LOWER_UN  ON ADDRESSES (
