@@ -88,8 +88,4 @@ public class User implements Persistable<Long> {
     protected void markNotNew() {
         this.isNewRecord = false;
     }
-
-    public String getFullName() {
-        return String.format("%s %s", firstName, lastName);
-    }
 }
