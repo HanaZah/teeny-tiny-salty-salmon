@@ -45,6 +45,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
     private User testAdvisor1;
     private User testAdvisor2;
     private User emptyAdvisor; // Advisor with 0 clients
+    private User createTestAdvisor;
     private Client testClient1;
     private Client testClient2;
     private Client updateClient;
@@ -62,11 +63,13 @@ class ClientControllerIT extends AbstractIntegrationTest {
             testAdvisor1 = TestFixtureFactory.createIntegrationUser(902L, "IT-CTRL-ADV1", hash, UserType.ADVISOR);
             testAdvisor2 = TestFixtureFactory.createIntegrationUser(903L, "IT-CTRL-ADV2", hash, UserType.ADVISOR);
             emptyAdvisor = TestFixtureFactory.createIntegrationUser(904L, "IT-CTRL-ADV3", hash, UserType.ADVISOR);
+            createTestAdvisor = TestFixtureFactory.createIntegrationUser(905L, "IT-CTRL-ADV4", hash, UserType.ADVISOR);
 
             entityManager.persist(testAdmin);
             entityManager.persist(testAdvisor1);
             entityManager.persist(testAdvisor2);
             entityManager.persist(emptyAdvisor);
+            entityManager.persist(createTestAdvisor);
 
             testClient1 = TestFixtureFactory.createIntegrationClient(901L, "UID-CTRL-C1", testAdvisor1, testAddress);
             testClient1.setFirstName("John");
@@ -93,6 +96,10 @@ class ClientControllerIT extends AbstractIntegrationTest {
 
     private RequestPostProcessor emptyAdvisorJwt() {
         return jwt().jwt(j -> j.subject(emptyAdvisor.getEmployeeId())).authorities(new SimpleGrantedAuthority("ADVISOR"));
+    }
+
+    private RequestPostProcessor createTestAdvisorJwt() {
+        return jwt().jwt(j -> j.subject(createTestAdvisor.getEmployeeId())).authorities(new SimpleGrantedAuthority("ADVISOR"));
     }
 
     private AddressInputDTO getValidAddressInput() {
@@ -153,7 +160,8 @@ class ClientControllerIT extends AbstractIntegrationTest {
                         .with(advisor1Jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].clientUid").value(testClient1.getClientUid()));
+                // checks that the array contains our target client, regardless of index
+                .andExpect(jsonPath("$[?(@.clientUid == '" + testClient1.getClientUid() + "')]").exists());
     }
 
     @Test
@@ -264,7 +272,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/clients")
-                        .with(advisor1Jwt())
+                        .with(createTestAdvisorJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -281,10 +289,12 @@ class ClientControllerIT extends AbstractIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/clients")
-                        .with(advisor1Jwt())
+                        .with(createTestAdvisorJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
+
+
     }
 
     @Test
@@ -297,7 +307,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/clients")
-                        .with(advisor1Jwt())
+                        .with(createTestAdvisorJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -315,7 +325,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/clients")
-                        .with(advisor1Jwt())
+                        .with(createTestAdvisorJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -333,7 +343,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/clients")
-                        .with(advisor1Jwt())
+                        .with(createTestAdvisorJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -350,7 +360,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         );
 
         mockMvc.perform(post("/api/v1/clients")
-                        .with(advisor1Jwt())
+                        .with(createTestAdvisorJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict())
