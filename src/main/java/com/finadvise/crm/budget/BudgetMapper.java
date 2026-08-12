@@ -1,5 +1,6 @@
 package com.finadvise.crm.budget;
 
+import com.finadvise.crm.dictionaries.DynamicDictionaryItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,20 @@ class BudgetMapper {
                 expenses.stream().map(this::toDto).toList(),
                 incomes.stream().mapToInt(Income::getAmount).sum() - expenses.stream().mapToInt(Expense::getAmount).sum()
         );
+    }
+
+    DynamicDictionaryItemDTO toDynamicDictionaryItemDto(IncomeType type) {
+        if (type == null) {
+            return null;
+        }
+        return new DynamicDictionaryItemDTO(type.getId(), type.getName());
+    }
+
+    DynamicDictionaryItemDTO toDynamicDictionaryItemDto(ExpenseType type) {
+        if (type == null) {
+            return null;
+        }
+        return new DynamicDictionaryItemDTO(type.getId(), type.getName());
     }
 
 }

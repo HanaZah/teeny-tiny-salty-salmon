@@ -1,5 +1,8 @@
 package com.finadvise.crm.users;
 
+import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -8,5 +11,6 @@ import java.util.Optional;
 public interface UserReadFacade {
     Optional<User> findByEmployeeId(String employeeId);
     AdvisorSummaryDTO mapToAdvisorSummary(User user);
-
+    List<StaticDictionaryItemDTO> getAllUserTypes();
+    List<StaticDictionaryItemDTO> getAllUserStates();
 }

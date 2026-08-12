@@ -3,11 +3,14 @@ package com.finadvise.crm.users;
 import com.finadvise.crm.common.ResourceConflictException;
 import com.finadvise.crm.common.ResourceVersionMismatchException;
 import com.finadvise.crm.common.SystemIntegrityException;
+import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -93,6 +96,16 @@ class UserService implements UserReadFacade{
     @Override
     public AdvisorSummaryDTO mapToAdvisorSummary(User user) {
         return userMapper.toAdvisorSummaryDto(user);
+    }
+
+    @Override
+    public List<StaticDictionaryItemDTO> getAllUserTypes() {
+        return Arrays.stream(UserType.values()).map(userMapper::toStaticDictionaryItemDto).toList();
+    }
+
+    @Override
+    public List<StaticDictionaryItemDTO> getAllUserStates() {
+        return Arrays.stream(UserStatus.values()).map(userMapper::toStaticDictionaryItemDto).toList();
     }
 
 }

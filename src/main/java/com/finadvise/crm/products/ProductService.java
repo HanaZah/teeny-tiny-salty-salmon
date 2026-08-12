@@ -5,11 +5,14 @@ import com.finadvise.crm.clients.ClientReadFacade;
 import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceNotFoundException;
 import com.finadvise.crm.common.SystemIntegrityException;
+import com.finadvise.crm.dictionaries.DynamicDictionaryItemDTO;
+import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserReadFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-class ProductService {
+class ProductService implements ProductReadFacade {
     private final ProductRepository productRepository;
     private final ProductTypeRepository productTypeRepository;
     private final ProviderRepository providerRepository;
@@ -138,5 +143,24 @@ class ProductService {
                 product,
                 userReadFacade.mapToAdvisorSummary(product.getAdvisor()),
                 clientReadFacade.mapToClientSummary(product.getClient()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DynamicDictionaryItemDTO> getAllProductTypes() {
+        return productTypeRepository.findAll(Sort.by(Sort.Direction.ASC, ProductType_.NAME))
+                .stream().map(productMapper::toDynamicDictionaryItemDto).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DynamicDictionaryItemDTO> getAllProductProviders() {
+        return providerRepository.findAll(Sort.by(Sort.Direction.ASC, Provider_.NAME))
+                .stream().map(productMapper::toDynamicDictionaryItemDto).toList();
+    }
+
+    @Override
+    public List<StaticDictionaryItemDTO> getAllProductStates() {
+        return Arrays.stream(ProductStatus.values()).map(productMapper::toStaticDictionaryItemDto).toList();
     }
 }

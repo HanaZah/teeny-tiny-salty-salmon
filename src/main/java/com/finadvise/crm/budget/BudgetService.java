@@ -4,8 +4,10 @@ import com.finadvise.crm.clients.Client;
 import com.finadvise.crm.clients.ClientReadFacade;
 import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceNotFoundException;
+import com.finadvise.crm.dictionaries.DynamicDictionaryItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,20 @@ class BudgetService implements BudgetReadFacade {
                 incomeRepository.findAllByClientUidWithDetails(clientUid),
                 expenseRepository.findAllByClientUidWithDetails(clientUid)
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DynamicDictionaryItemDTO> getAllIncomeTypes() {
+        return incomeTypeRepository.findAll(Sort.by(Sort.Direction.ASC, IncomeType_.NAME))
+                .stream().map(budgetMapper::toDynamicDictionaryItemDto).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DynamicDictionaryItemDTO> getAllExpenseTypes() {
+        return expenseTypeRepository.findAll(Sort.by(Sort.Direction.ASC, ExpenseType_.NAME))
+                .stream().map(budgetMapper::toDynamicDictionaryItemDto).toList();
     }
 
     @PreAuthorize("hasAuthority('ADVISOR')")

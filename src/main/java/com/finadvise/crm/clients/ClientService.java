@@ -2,6 +2,7 @@ package com.finadvise.crm.clients;
 
 import com.finadvise.crm.addresses.Address;
 import com.finadvise.crm.common.*;
+import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
 import com.finadvise.crm.users.User;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,6 +41,11 @@ class ClientService implements ClientReadFacade {
     @Transactional(readOnly = true)
     public Optional<Client> findByClientUidAndAdvisorEmployeeId(String clientUid, String employeeId) {
         return clientRepository.findByClientUidAndAdvisor_EmployeeId(clientUid, employeeId);
+    }
+
+    @Override
+    public List<StaticDictionaryItemDTO> getAllClientStates() {
+        return Arrays.stream(ClientStatus.values()).map(clientMapper::toStaticDictionaryItemDto).toList();
     }
 
     @Transactional(readOnly = true)

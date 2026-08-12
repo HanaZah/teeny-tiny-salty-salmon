@@ -2,6 +2,7 @@ package com.finadvise.crm.clients;
 
 import com.finadvise.crm.addresses.AddressDTO;
 import com.finadvise.crm.budget.FullBudgetDTO;
+import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
 import com.finadvise.crm.users.AdvisorSummaryDTO;
 import org.springframework.stereotype.Component;
 
@@ -82,5 +83,12 @@ class ClientMapper {
                 client.getContactCityName(),
                 client.isActive()? ClientStatus.ACTIVE.getLabel() : ClientStatus.INACTIVE.getLabel()
         );
+    }
+
+    StaticDictionaryItemDTO toStaticDictionaryItemDto(ClientStatus status) {
+        if (status == null) {
+            return null;
+        }
+        return new StaticDictionaryItemDTO(status.name(), status.getLabel());
     }
 }

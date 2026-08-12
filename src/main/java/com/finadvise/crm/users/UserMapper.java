@@ -1,5 +1,6 @@
 package com.finadvise.crm.users;
 
+import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -75,5 +76,19 @@ class UserMapper {
                 user.getEmployeeId(),
                 user.getFirstName(),
                 user.getLastName());
+    }
+
+    StaticDictionaryItemDTO toStaticDictionaryItemDto(UserType type) {
+        if (type == null) {
+            return null;
+        }
+        return new StaticDictionaryItemDTO(type.name(), type.getLabel());
+    }
+
+    StaticDictionaryItemDTO toStaticDictionaryItemDto(UserStatus status) {
+        if (status == null) {
+            return null;
+        }
+        return new StaticDictionaryItemDTO(status.name(), status.getLabel());
     }
 }

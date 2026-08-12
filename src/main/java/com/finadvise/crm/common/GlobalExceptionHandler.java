@@ -14,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.util.Map;
@@ -178,6 +179,24 @@ public class GlobalExceptionHandler {
         );
         problemDetail.setTitle("Bad Request");
         problemDetail.setType(URI.create(ErrorCodes.VALIDATION_FAILED));
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Invalid parameter type provided."
+        );
+        problemDetail.setTitle("Validation Failed");
+        problemDetail.setType(URI.create(ErrorCodes.VALIDATION_FAILED));
+
+        String paramName = ex.getName();
+        String message = ex.getRootCause() == null ?
+                "Failed to convert value to required type." : ex.getRootCause().getMessage();
+
+        problemDetail.setProperty("invalid_params", Map.of(paramName, message));
 
         return problemDetail;
     }
