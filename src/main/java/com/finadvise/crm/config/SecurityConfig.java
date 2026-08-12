@@ -12,7 +12,6 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,12 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    @Value("${JWT_SECRET}")
-    private String jwtSecret;
-
-    @Value( "${SELF}")
-    private String SELF;
+    private final SecurityProperties securityProperties;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationEntryPoint jwtAuthenticationEntryPoint) {
@@ -70,11 +64,11 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         // Custom decoder using our local secret instead of an external URI
-        SecretKey secretKey = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
+        SecretKey secretKey = new SecretKeySpec(securityProperties.jwtSecret().getBytes(), "HmacSHA256");
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(secretKey).build();
 
-        OAuth2TokenValidator<Jwt> issuerValidator = new JwtIssuerValidator(SELF);
-        OAuth2TokenValidator<Jwt> audienceValidator = new JwtAudienceValidator(SELF);
+        OAuth2TokenValidator<Jwt> issuerValidator = new JwtIssuerValidator(securityProperties.self());
+        OAuth2TokenValidator<Jwt> audienceValidator = new JwtAudienceValidator(securityProperties.self());
         OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
 
         OAuth2TokenValidator<Jwt> combinedValidator =
@@ -87,7 +81,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtEncoder jwtEncoder() {
-        JWK jwk = new OctetSequenceKey.Builder(jwtSecret.getBytes())
+        JWK jwk = new OctetSequenceKey.Builder(securityProperties.jwtSecret().getBytes())
                 .algorithm(JWSAlgorithm.HS256)
                 .build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
