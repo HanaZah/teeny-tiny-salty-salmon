@@ -1,6 +1,5 @@
 package com.finadvise.crm.users;
 
-import com.finadvise.crm.common.ObfuscatedIdGenerator;
 import com.finadvise.crm.config.AdminProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ class AdminDatabaseSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObfuscatedIdGenerator idGenerator;
     private final AdminProperties adminProperties;
 
     @Override
@@ -25,11 +23,10 @@ class AdminDatabaseSeeder implements CommandLineRunner {
     public void run(String @NonNull ... args) {
         if (userRepository.findFirstActiveByUserType_Admin().isEmpty()) {
             Long userId = userRepository.getNextSequenceValue();
-            String employeeId = idGenerator.encode(userId);
 
             User admin = User.builder()
                     .id(userId)
-                    .employeeId(employeeId)
+                    .employeeId(adminProperties.employeeId())
                     .passwordHash(passwordEncoder.encode(adminProperties.password()))
                     .firstName(adminProperties.firstName())
                     .lastName(adminProperties.lastName())
@@ -39,7 +36,7 @@ class AdminDatabaseSeeder implements CommandLineRunner {
                     .build();
 
             userRepository.save(admin);
-            log.info("Seeded initial Admin user with Employee ID: {}", employeeId);
+            log.info("Seeded initial Admin user with Employee ID: {}", adminProperties.employeeId());
         }
     }
 }

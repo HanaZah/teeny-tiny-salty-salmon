@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "crm.admin.initial")
 public record AdminProperties(
+        String employeeId,
         String password,
         String email,
         String phone,
