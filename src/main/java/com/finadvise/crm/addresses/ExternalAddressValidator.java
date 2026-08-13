@@ -2,8 +2,8 @@ package com.finadvise.crm.addresses;
 
 interface ExternalAddressValidator {
     /**
-     * Validates if the address exists in the national registry (RÚIAN).
-     * Throws InvalidAddressException if the address is not found.
+     * Validates and formats the address via external API like national registry (RÚIAN).
+     * Throws AddressValidationException if no such address exists.
      */
-    void validate(AddressInputDTO address);
+    AddressInputDTO validate(AddressInputDTO address);
 }

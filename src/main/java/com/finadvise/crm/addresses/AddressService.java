@@ -25,13 +25,13 @@ class AddressService implements AddressFacade {
         if (dto == null) {
             return null;
         }
-        addressValidator.validate(dto);
+        AddressInputDTO validatedAddress = addressValidator.validate(dto);
 
         return addressRepository.findExistingAddressCaseInsensitive(
-                        dto.street().trim(),
-                        dto.city().trim(),
-                        dto.postalCode().trim(),
-                        dto.houseNumber().trim()
+                        validatedAddress.street().trim(),
+                        validatedAddress.city().trim(),
+                        validatedAddress.postalCode().trim(),
+                        validatedAddress.houseNumber().trim()
                 ).map(addressMapper::toDto)
                 .orElseGet(() -> attemptCreateWithFallback(dto));
     }

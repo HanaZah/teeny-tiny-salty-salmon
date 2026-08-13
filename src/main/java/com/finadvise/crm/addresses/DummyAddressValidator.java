@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 @Profile("!prod")
 class DummyAddressValidator implements ExternalAddressValidator{
     @Override
-    public void validate(AddressInputDTO address) {
+    public AddressInputDTO validate(AddressInputDTO address) {
         // Empty dummy, in dev we relay on partial validation in DTO
+        return address;
     }
 }
