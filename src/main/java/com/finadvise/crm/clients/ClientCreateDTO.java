@@ -29,7 +29,7 @@ public record ClientCreateDTO(
 
         @NotBlank(message = "Occupation is required")
         @Size(max = 100, message = "Occupation must be at most 100 characters long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "Occupation contains invalid characters. " +
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.,]+$", message = "Occupation contains invalid characters. " +
                 "Please use only standard letters, digits and basic punctuation.")
         String occupation,
 
