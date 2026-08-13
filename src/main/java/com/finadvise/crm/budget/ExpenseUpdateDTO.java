@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record ExpenseUpdateDTO(
-        @NotNull(message = "Amount is required")
-        @Min(value = 0, message = "Amount must be greater than or equal to 0")
-        @Max(value = 999999999, message = "Amount must be less than or equal to 999,999,999")
+        @NotNull(message = "budget.expense.amount.required")
+        @Min(value = 0, message = "budget.expense.amount.min-zero")
+        @Max(value = 999999999, message = "budget.expense.amount.max")
         Integer amount,
 
-        @NotNull(message = "Type ID is required")
+        @NotNull(message = "budget.expense.type.required")
         Long typeId,
 
-        @NotNull(message = "Mandatory expense flag is required")
+        @NotNull(message = "budget.expense.mandatory.required")
         Boolean isMandatory
 ) {}

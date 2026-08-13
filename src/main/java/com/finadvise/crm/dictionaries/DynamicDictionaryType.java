@@ -14,7 +14,7 @@ public enum DynamicDictionaryType {
     INCOME_TYPE("Druh příjmu", "income-type"),
     EXPENSE_TYPE("Druh výdaje", "expense-type"),
     PRODUCT_TYPE("Druh produktu", "product-type"),
-    PRODUCT_PROVIDER("Poskytovatel produktu", "product-provider"),;
+    PRODUCT_PROVIDER("Poskytovatel produktu", "product-provider");
 
     private final String label;
     private final String pathValue;
@@ -26,7 +26,7 @@ public enum DynamicDictionaryType {
     public static DynamicDictionaryType fromPathValue(String pathValue) {
         DynamicDictionaryType type = LOOKUP_MAP.get(pathValue);
         if (type == null) {
-            throw new InvalidInputValueException("Unknown dynamic dictionary type: " + pathValue);
+            throw new InvalidInputValueException("error.dictionary.dynamic.unknown");
         }
         return type;
     }

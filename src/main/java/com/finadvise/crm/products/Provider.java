@@ -19,6 +19,6 @@ public class Provider {
     private Long id;
 
     @Column(name = "NAME", nullable = false, unique = true, length = 100)
-    @NotBlank(message = "Provider name cannot be blank")
+    @NotBlank(message = "provider.name.required")
     private String name;
 }

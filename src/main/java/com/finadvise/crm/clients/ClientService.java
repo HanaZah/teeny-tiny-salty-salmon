@@ -52,7 +52,7 @@ class ClientService implements ClientReadFacade {
     @PreAuthorize("hasAuthority('ADVISOR') and #employeeId == authentication.name")
     public List<ClientOverviewDTO> getRecentClientOverviews(String employeeId, int limit) {
         if (limit <= 0 || limit > 20) {
-            throw new InvalidInputValueException("Invalid limit value, must be between 1 and 20");
+            throw new InvalidInputValueException("error.client.overview.limit-invalid");
         }
 
         return clientRepository.findRecentClientOverviews(employeeId, LocalDate.now(clock), Limit.of(limit))
@@ -84,10 +84,10 @@ class ClientService implements ClientReadFacade {
     public Client getDetailedClient(String clientUid, String employeeId, boolean isAdmin) {
         if (isAdmin) {
             return clientRepository.findByClientUidWithDetails(clientUid)
-                    .orElseThrow(() -> new ResourceNotFoundException("Client not found or access denied"));
+                    .orElseThrow(() -> new ResourceNotFoundException("error.client.not-found"));
         } else {
             return clientRepository.findByClientUidAndAdvisor_EmployeeIdWithDetails(clientUid, employeeId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Client not found or access denied"));
+                    .orElseThrow(() -> new ResourceNotFoundException("error.client.not-found"));
         }
     }
 
@@ -123,23 +123,23 @@ class ClientService implements ClientReadFacade {
             @Nullable String currentIdCardNumber) {
 
         if (!Objects.equals(idCardNumber, currentIdCardNumber) && clientRepository.existsByIdCardNumber(idCardNumber)) {
-            throw new ResourceConflictException("Client with this ID card number already exists");
+            throw new ResourceConflictException("error.client.id-card.conflict");
         }
 
         if (!idCardIssueDate.isAfter(birthDate)) {
-            throw new InvalidInputValueException("Client ID card issue must be after the birth date");
+            throw new InvalidInputValueException("error.client.id-card.issue-before-birth");
         }
 
         if (idCardIssueDate.isAfter(LocalDate.now(clock))) {
-            throw new InvalidInputValueException("ID card issue date cannot be in the future");
+            throw new InvalidInputValueException("error.client.id-card.issue-future");
         }
 
         if (idCardIssueDate.isAfter(idCardExpiryDate)) {
-            throw new InvalidInputValueException("ID card issue date must be before expiry date");
+            throw new InvalidInputValueException("error.client.id-card.issue-after-expiry");
         }
 
         if (idCardExpiryDate.isBefore(LocalDate.now(clock))) {
-            throw new InvalidInputValueException("Cannot create client with expired ID card");
+            throw new InvalidInputValueException("error.client.id-card.expired");
         }
     }
 
@@ -152,11 +152,11 @@ class ClientService implements ClientReadFacade {
         final int LEGAL_AGE_LIMIT = 18;
 
         if (!Objects.equals(personalId, currentPersonalId) && clientRepository.existsByPersonalId(personalId)) {
-            throw new ResourceConflictException("Client with this personal ID already exists");
+            throw new ResourceConflictException("error.client.personal-id.conflict");
         }
 
         if (Period.between(birthDate, LocalDate.now(clock)).getYears() < LEGAL_AGE_LIMIT) {
-            throw new InvalidInputValueException("Client must be at least " + LEGAL_AGE_LIMIT + " years old");
+            throw new InvalidInputValueException("error.client.underage");
         }
     }
 
@@ -197,8 +197,7 @@ class ClientService implements ClientReadFacade {
             Address contactAddress) {
 
         if (!client.getVersion().equals(dto.version())) {
-            throw new ResourceVersionMismatchException("Client record has been updated since last read. " +
-                    "Please refresh and retry.");
+            throw new ResourceVersionMismatchException("error.concurrency.version-mismatch");
         }
 
         client.validateEligibilityForUpdate();
@@ -225,8 +224,7 @@ class ClientService implements ClientReadFacade {
     @PreAuthorize("hasAuthority('ADVISOR') and #client.advisor.employeeId == authentication.name")
     public Client updateIdCard(ClientIdCardUpdateDTO dto, Client client) {
         if (!client.getVersion().equals(dto.version())) {
-            throw new ResourceVersionMismatchException("Client record has been updated since last read. " +
-                    "Please refresh and retry.");
+            throw new ResourceVersionMismatchException("error.concurrency.version-mismatch");
         }
 
         client.validateEligibilityForUpdate();
@@ -243,7 +241,7 @@ class ClientService implements ClientReadFacade {
     @PreAuthorize("hasAuthority('ADMIN')")
     public Client updateStatus(ClientStatusUpdateDTO dto, Client client) {
         if (client.isActive() == dto.isActive()) {
-            throw new InvalidInputValueException("Client is already in the desired state.");
+            throw new InvalidInputValueException("error.client.status.redundant");
         }
 
         client.setActive(dto.isActive());

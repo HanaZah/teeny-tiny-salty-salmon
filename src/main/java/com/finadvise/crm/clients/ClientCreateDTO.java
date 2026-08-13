@@ -7,64 +7,60 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 public record ClientCreateDTO(
-        @NotBlank(message = "Personal ID is required")
-        @Size(min = 10, max = 10, message = "Personal ID must be exactly 10 characters long")
-        @Pattern(regexp = "^\\d{10}$", message = "Personal ID must consist of exactly 10 digits")
+        @NotBlank(message = "client.personal-id.required")
+        @Size(min = 10, max = 10, message = "client.personal-id.size")
+        @Pattern(regexp = "^\\d{10}$", message = "client.personal-id.format")
         String personalId,
 
-        @NotNull(message = "Birth date is required")
+        @NotNull(message = "client.birth-date.required")
         LocalDate birthDate,
 
-        @NotBlank(message = "First name is required")
-        @Size(max = 50, message = "First name must be at most 50 characters long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "First name contains invalid characters. " +
-                "Please use only standard letters, digits and basic punctuation.")
+        @NotBlank(message = "client.first-name.required")
+        @Size(max = 50, message = "client.first-name.size")
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "client.first-name.format")
         String firstName,
 
-        @NotBlank(message = "Last name is required")
-        @Size(max = 50, message = "Last name must be at most 50 characters long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "Last name contains invalid characters. " +
-                "Please use only standard letters, digits and basic punctuation.")
+        @NotBlank(message = "client.last-name.required")
+        @Size(max = 50, message = "client.last-name.size")
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "client.last-name.format")
         String lastName,
 
-        @NotBlank(message = "Occupation is required")
-        @Size(max = 100, message = "Occupation must be at most 100 characters long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.,]+$", message = "Occupation contains invalid characters. " +
-                "Please use only standard letters, digits and basic punctuation.")
+        @NotBlank(message = "client.occupation.required")
+        @Size(max = 100, message = "client.occupation.size")
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.,]+$", message = "client.occupation.format")
         String occupation,
 
-        @NotBlank(message = "Phone number is required")
-        @Size(max = 20, message = "Phone number must be at most 20 characters long")
-        @Pattern(regexp = "^\\+?[\\d\\s\\-]+$", message = "Invalid phone format.")
+        @NotBlank(message = "client.phone.required")
+        @Size(max = 20, message = "client.phone.size")
+        @Pattern(regexp = "^\\+?[\\d\\s\\-]+$", message = "client.phone.format")
         String phone,
 
-        @NotBlank(message = "Email is required")
-        @Size(max = 254, message = "Email must be at most 254 characters long")
-        @Email(message = "Must be a valid email format")
+        @NotBlank(message = "client.email.required")
+        @Size(max = 254, message = "client.email.size")
+        @Email(message = "client.email.format")
         String email,
 
-        @NotBlank(message = "ID card number is required")
-        @Size(min = 9, max = 9, message = "ID card number must be exactly 9 characters long")
-        @Pattern(regexp = "^\\d{9}$", message = "ID card number must consist of exactly 9 digits")
+        @NotBlank(message = "client.id-card-number.required")
+        @Size(min = 9, max = 9, message = "client.id-card-number.size")
+        @Pattern(regexp = "^\\d{9}$", message = "client.id-card-number.format")
         String idCardNumber,
 
-        @NotNull(message = "ID card issue date is required")
+        @NotNull(message = "client.id-card-issue-date.required")
         LocalDate idCardIssueDate,
 
-        @NotNull(message = "ID card expiry date is required")
+        @NotNull(message = "client.id-card-expiry-date.required")
         LocalDate idCardExpiryDate,
 
-        @NotBlank(message = "ID card issuer is required")
-        @Size(max = 100, message = "ID card issuer must be at most 100 characters long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "ID card issuer contains invalid characters. " +
-                "Please use only standard letters, digits and basic punctuation.")
+        @NotBlank(message = "client.id-card-issuer.required")
+        @Size(max = 100, message = "client.id-card-issuer.size")
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "client.id-card-issuer.format")
         String idCardIssuer,
 
-        @NotNull(message = "Residential address is required")
+        @NotNull(message = "client.residential-address.required")
         @Valid
         AddressInputDTO residentialAddress,
 
-        @NotNull(message = "Contact address is required")
+        @NotNull(message = "client.contact-address.required")
         @Valid
         AddressInputDTO contactAddress
 ) {}

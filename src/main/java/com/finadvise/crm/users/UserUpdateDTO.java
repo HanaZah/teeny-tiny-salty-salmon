@@ -3,42 +3,40 @@ package com.finadvise.crm.users;
 import jakarta.validation.constraints.*;
 
 public record UserUpdateDTO(
-        @NotNull(message = "Version is required for concurrency control")
+        @NotNull(message = "user.version.required")
         Integer version,
 
-        @NotBlank(message = "IČO is required")
-        @Size(max = 8, min = 8, message = "IČO must be exactly 8 characters long")
-        @Pattern(regexp = "^\\d{8}", message = "IČO must contain exactly 8 digits")
+        @NotBlank(message = "user.ico.required")
+        @Size(max = 8, min = 8, message = "user.ico.size")
+        @Pattern(regexp = "^\\d{8}", message = "user.ico.format")
         String ico,
 
-        @NotBlank(message = "First name is required")
-        @Size(max = 50, message = "First name must be at most 50 characters long")
+        @NotBlank(message = "user.first-name.required")
+        @Size(max = 50, message = "user.first-name.size")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\s\\-']+$",
-                message = "First name contains invalid characters." +
-                        "Please use only standard letters, possibly hyphen or apostrophe."
+                message = "user.first-name.format"
         )
         String firstName,
 
-        @NotBlank(message = "Last name is required")
-        @Size(max = 50, message = "Last name must be at most 50 characters long")
+        @NotBlank(message = "user.last-name.required")
+        @Size(max = 50, message = "user.last-name.size")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\s\\-']+$",
-                message = "Last name contains invalid characters." +
-                        "Please use only standard letters, possibly hyphen or apostrophe."
+                message = "user.last-name.format"
         )
         String lastName,
 
-        @NotBlank(message = "Phone is required")
-        @Size(max = 20, message = "Phone must be at most 20 characters long")
+        @NotBlank(message = "user.phone.required")
+        @Size(max = 20, message = "user.phone.size")
         @Pattern(
                 regexp = "^\\+?[\\d\\s\\-]+$",
-                message = "Phone number can only contain digits, spaces, hyphens, and an optional leading plus sign"
+                message = "user.phone.format"
         )
         String phone,
 
-        @NotBlank(message = "Email is required")
-        @Size(max = 254, message = "Email must be at most 254 characters long")
-        @Email(message = "Must be a valid email format")
+        @NotBlank(message = "user.email.required")
+        @Size(max = 254, message = "user.email.size")
+        @Email(message = "user.email.format")
         String email
 ) {}

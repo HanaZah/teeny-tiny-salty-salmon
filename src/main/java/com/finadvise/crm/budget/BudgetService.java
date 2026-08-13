@@ -55,16 +55,16 @@ class BudgetService implements BudgetReadFacade {
     public FullBudgetDTO updateFullBudgetForClient(String clientUid, String employeeId, FullBudgetUpdateDTO dto) {
         long uniqueIncomeTypes = dto.incomes().stream().map(IncomeUpdateDTO::typeId).distinct().count();
         if (uniqueIncomeTypes != dto.incomes().size()) {
-            throw new InvalidInputValueException("Unique income types constraint violated");
+            throw new InvalidInputValueException("error.budget.income.duplicate-type");
         }
 
         long uniqueExpenseTypes = dto.expenses().stream().map(ExpenseUpdateDTO::typeId).distinct().count();
         if (uniqueExpenseTypes != dto.expenses().size()) {
-            throw new InvalidInputValueException("Unique expense types constraint violated");
+            throw new InvalidInputValueException("error.budget.expense.duplicate-type");
         }
 
         Client client = clientReadFacade.findByClientUidAndAdvisorEmployeeId(clientUid, employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Client not found or access denied"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.client.not-found"));
         client.validateEligibilityForUpdate();
 
         Map<Long, Income> currentIncomes = incomeRepository.findAllByClient_ClientUid(clientUid).stream()
@@ -76,7 +76,6 @@ class BudgetService implements BudgetReadFacade {
         List<Income> incomesToDelete = new ArrayList<>();
         List<Expense> expensesToSave = new ArrayList<>();
         List<Expense> expensesToDelete = new ArrayList<>();
-
 
         for (IncomeUpdateDTO incomeDto : dto.incomes()) {
             Income existing = currentIncomes.get(incomeDto.typeId());
@@ -102,7 +101,7 @@ class BudgetService implements BudgetReadFacade {
 
             if (existing != null) {
                 if (expenseDto.amount() > 0
-                    && (!expenseDto.amount().equals(existing.getAmount())
+                        && (!expenseDto.amount().equals(existing.getAmount())
                         || !expenseDto.isMandatory().equals(existing.isMandatory()))) {
 
                     existing.setMandatory(expenseDto.isMandatory());
@@ -130,7 +129,7 @@ class BudgetService implements BudgetReadFacade {
             incomeRepository.flush();
             expenseRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new InvalidInputValueException("One or more provided budget item type IDs do not exist.");
+            throw new InvalidInputValueException("error.budget.invalid-type-id");
         }
 
         return getFullBudgetForClient(clientUid);

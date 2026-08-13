@@ -25,9 +25,9 @@ public class Expense {
     private Long id;
 
     @Column(name = "AMOUNT", nullable = false)
-    @Min(value = 1, message = "Amount must be at least 1")
-    @Max(value = 999999999, message = "Amount cannot exceed 999,999,999")
-    @NotNull(message = "Amount is required")
+    @Min(value = 1, message = "budget.expense.amount.min")
+    @Max(value = 999999999, message = "budget.expense.amount.max")
+    @NotNull(message = "budget.expense.amount.required")
     private Integer amount;
 
     @Column(name = "IS_MANDATORY", nullable = false)
@@ -37,12 +37,12 @@ public class Expense {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CLIENT_ID", nullable = false, updatable = false)
-    @NotNull(message = "Client is required")
+    @NotNull(message = "budget.expense.client.required")
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EXPENSE_TYPE_ID", nullable = false)
     @Fetch(FetchMode.JOIN)
-    @NotNull(message = "Expense type is required")
+    @NotNull(message = "budget.expense.type.required")
     private ExpenseType expenseType;
 }

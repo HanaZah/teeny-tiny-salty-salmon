@@ -4,25 +4,24 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ProductSearchCriteriaDTO (
-        @Size(max = 20, message = "Employee ID has wrong size or pattern")
+        @Size(max = 20, message = "product.search.advisor-id.size")
         @Pattern(
                 regexp = "^[a-zA-Z0-9\\-]+$",
-                message = "Employee ID has wrong size or pattern"
+                message = "product.search.advisor-id.format"
         )
         String advisorEmployeeId,
 
-        @Size(max = 20, message = "Client UID has wrong size or pattern")
+        @Size(max = 20, message = "product.search.client-uid.size")
         @Pattern(
                 regexp = "^[a-zA-Z0-9\\-]+$",
-                message = "Client UID has wrong size or pattern"
+                message = "product.search.client-uid.format"
         )
         String clientUid,
 
-        @Size(max = 150, message = "Product name must be at most 150 characters long")
+        @Size(max = 150, message = "product.search.name.size")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\d\\s\\-']+$",
-                message = "Product name contains invalid characters." +
-                        "Please use only standard letters, digits and basic punctuation."
+                message = "product.search.name.format"
         )
         String productName,
 

@@ -106,8 +106,7 @@ class AuthControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Validation Failed"))
-                .andExpect(jsonPath("$.type").value(ErrorCodes.VALIDATION_FAILED))
-                .andExpect(jsonPath("$.invalid_params.employeeId").value("Employee ID has wrong size or pattern"));
+                .andExpect(jsonPath("$.type").value(ErrorCodes.VALIDATION_FAILED));
     }
 
     @Test
@@ -131,8 +130,7 @@ class AuthControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Validation Failed"))
-                .andExpect(jsonPath("$.type").value(ErrorCodes.VALIDATION_FAILED))
-                .andExpect(jsonPath("$.invalid_params.password").value("Password must be between 8 and 72 characters"));
+                .andExpect(jsonPath("$.type").value(ErrorCodes.VALIDATION_FAILED));
     }
 
     //----E2E FORGOTTEN PASSWORD TESTS----

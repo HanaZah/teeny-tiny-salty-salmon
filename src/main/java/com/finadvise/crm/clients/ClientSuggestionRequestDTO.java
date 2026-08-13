@@ -6,11 +6,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ClientSuggestionRequestDTO(
-        @Size(max = 100, message = "Search query is too long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\s\\-']*$", message = "Search query contains invalid characters.")
+        @Size(max = 100, message = "client.suggestion.name.size")
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\s\\-']*$", message = "client.suggestion.name.format")
         String name,
 
-        @Min(value = 1, message = "Limit must be at least 1")
-        @Max(value = 100, message = "Limit cannot exceed 100")
+        @Min(value = 1, message = "client.suggestion.limit.min")
+        @Max(value = 100, message = "client.suggestion.limit.max")
         int limit
 ) {}

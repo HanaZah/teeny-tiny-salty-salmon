@@ -23,19 +23,19 @@ public class Income {
     private Long id;
 
     @Column(name = "AMOUNT", nullable = false)
-    @Min(value = 1, message = "Amount must be at least 1")
-    @Max(value = 999999999, message = "Amount cannot exceed 999,999,999")
-    @NotNull(message = "Amount is required")
+    @Min(value = 1, message = "budget.income.amount.min")
+    @Max(value = 999999999, message = "budget.income.amount.max")
+    @NotNull(message = "budget.income.amount.required")
     private Integer amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CLIENT_ID", nullable = false, updatable = false)
-    @NotNull(message = "Client is required")
+    @NotNull(message = "budget.income.client.required")
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "INCOME_TYPE_ID", nullable = false)
     @Fetch(FetchMode.JOIN)
-    @NotNull(message = "Income type is required")
+    @NotNull(message = "budget.income.type.required")
     private IncomeType incomeType;
 }

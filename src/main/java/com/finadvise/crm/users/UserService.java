@@ -27,22 +27,18 @@ class UserService implements UserReadFacade{
 
     @Transactional(readOnly = true)
     public UserContactDTO getAdminContact() {
-       User admin = userRepository.findFirstActiveByUserType_Admin().orElseThrow(
-               () -> new SystemIntegrityException("Critical system failure: No admin user found")
-       );
+        User admin = userRepository.findFirstActiveByUserType_Admin().orElseThrow(
+                () -> new SystemIntegrityException("error.system.admin-missing")
+        );
 
-       return userMapper.toContactDto(admin);
+        return userMapper.toContactDto(admin);
     }
 
-    // Note: methods are public while the class is package private.
-    // This is to ensure the @PreAuthorize does its job as it's only guaranteed for public methods.
     @PreAuthorize("#employeeId == authentication.name")
     @Transactional(readOnly = true)
     public UserProfileDTO getUserProfile(String employeeId) {
-        // technically possible since token revocation isn't implemented yet
         User user = userRepository.findByEmployeeId(employeeId).orElseThrow(
-                () -> new SystemIntegrityException("Critical system failure: " +
-                        "Authenticated user record is missing from the database")
+                () -> new SystemIntegrityException("error.system.user-missing")
         );
         AdvisorStatisticsDTO advisorStats = null;
 
@@ -61,17 +57,15 @@ class UserService implements UserReadFacade{
     @Transactional
     public UserProfileDTO updateUserProfile(String employeeId, UserUpdateDTO dto) {
         User user = userRepository.findByEmployeeId(employeeId).orElseThrow(
-                () -> new SystemIntegrityException("Critical system failure: " +
-                        "Authenticated user record is missing from the database")
+                () -> new SystemIntegrityException("error.system.user-missing")
         );
 
         if (!Objects.equals(user.getVersion(), dto.version())) {
-            throw new ResourceVersionMismatchException("User record has been updated since last read. " +
-                    "Please refresh and retry.");
+            throw new ResourceVersionMismatchException("error.concurrency.version-mismatch");
         }
 
         if (!Objects.equals(dto.ico(), user.getIco()) && userRepository.existsByIco(dto.ico())) {
-            throw new ResourceConflictException("User with this IČO already exists.");
+            throw new ResourceConflictException("error.user.ico.conflict");
         }
 
         user.setIco(dto.ico());
@@ -107,5 +101,4 @@ class UserService implements UserReadFacade{
     public List<StaticDictionaryItemDTO> getAllUserStates() {
         return Arrays.stream(UserStatus.values()).map(userMapper::toStaticDictionaryItemDto).toList();
     }
-
 }

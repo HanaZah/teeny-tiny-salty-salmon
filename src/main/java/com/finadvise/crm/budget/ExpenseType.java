@@ -19,7 +19,7 @@ public class ExpenseType {
     private Long id;
 
     @Column(name = "NAME", nullable = false, unique = true, length = 50)
-    @NotBlank(message = "Expense type name cannot be blank")
-    @Size(max = 50, message = "Expense type name cannot exceed 50 characters")
+    @NotBlank(message = "budget.expense-type.name.required")
+    @Size(max = 50, message = "budget.expense-type.name.size")
     private String name;
 }

@@ -25,7 +25,7 @@ public enum StaticDictionaryType {
     public static StaticDictionaryType fromPathValue(String pathValue) {
         StaticDictionaryType type = LOOKUP_MAP.get(pathValue);
         if (type == null) {
-            throw new InvalidInputValueException("Unknown static dictionary type: " + pathValue);
+            throw new InvalidInputValueException("error.dictionary.static.unknown");
         }
         return type;
     }

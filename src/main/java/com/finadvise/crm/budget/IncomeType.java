@@ -19,7 +19,7 @@ public class IncomeType {
     private Long id;
 
     @Column(name = "NAME", nullable = false, unique = true, length = 50)
-    @NotBlank(message = "Income type name cannot be blank")
-    @Size(max = 50, message = "Income type name cannot exceed 50 characters")
+    @NotBlank(message = "budget.income-type.name.required")
+    @Size(max = 50, message = "budget.income-type.name.size")
     private String name;
 }

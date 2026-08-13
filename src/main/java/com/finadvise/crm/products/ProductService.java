@@ -38,21 +38,21 @@ class ProductService implements ProductReadFacade {
     @Transactional
     public ProductDTO updateProduct(Long productId, ProductUpdateDTO dto, String employeeId) {
         Product product = productRepository.findByIdAndAdvisor_EmployeeId(productId, employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("Product not found or access denied")
+                () -> new ResourceNotFoundException("error.product.not-found")
         );
 
         if (dto.endDate() != null && dto.endDate().isBefore(dto.startDate())) {
-            throw new InvalidInputValueException("End date must be after start date");
+            throw new InvalidInputValueException("error.product.end-date-before-start");
         }
 
         if (!dto.productTypeId().equals(product.getProductType().getId())
                 && !productTypeRepository.existsById(dto.productTypeId())) {
-            throw new InvalidInputValueException("Product type not found");
+            throw new InvalidInputValueException("error.product.type.not-found");
         }
 
         if (!dto.productProviderId().equals(product.getProvider().getId())
                 && !providerRepository.existsById(dto.productProviderId()) ) {
-            throw new InvalidInputValueException("Product provider not found");
+            throw new InvalidInputValueException("error.product.provider.not-found");
         }
 
         product.setName(dto.name());
@@ -69,7 +69,7 @@ class ProductService implements ProductReadFacade {
         }
 
         productRepository.saveAndFlush(product);
-        product = productRepository.findByIdWithDetails(product.getId()).orElseThrow(); //this will never throw, we just saved
+        product = productRepository.findByIdWithDetails(product.getId()).orElseThrow(); // this will never throw, we just saved
 
         return productMapper.toDto(product,
                 userReadFacade.mapToAdvisorSummary(product.getAdvisor()),
@@ -101,28 +101,27 @@ class ProductService implements ProductReadFacade {
     @Transactional
     public ProductDTO createProduct(ProductCreateDTO dto, String employeeId, String clientUid) {
         User advisor = userReadFacade.findByEmployeeId(employeeId).orElseThrow(
-                () -> new SystemIntegrityException("Critical system failure: " +
-                        "Authenticated user record is missing from the database")
+                () -> new SystemIntegrityException("error.system.user-missing")
         );
 
         User productManager = dto.isExternal()? null : advisor;
 
         Client client = clientReadFacade.findByClientUidAndAdvisorEmployeeId(clientUid, employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("Client not found or access denied")
+                () -> new ResourceNotFoundException("error.client.not-found")
         );
 
         client.validateEligibilityForNewProduct(LocalDate.now(clock));
 
         if (dto.endDate() != null && dto.endDate().isBefore(dto.startDate())) {
-            throw new InvalidInputValueException("End date must be after start date");
+            throw new InvalidInputValueException("error.product.end-date-before-start");
         }
 
         if (!productTypeRepository.existsById(dto.productTypeId())) {
-            throw new InvalidInputValueException("Product type not found");
+            throw new InvalidInputValueException("error.product.type.not-found");
         }
 
         if (!providerRepository.existsById(dto.productProviderId()) ) {
-            throw new InvalidInputValueException("Product provider not found");
+            throw new InvalidInputValueException("error.product.provider.not-found");
         }
 
         Product product = Product.builder()

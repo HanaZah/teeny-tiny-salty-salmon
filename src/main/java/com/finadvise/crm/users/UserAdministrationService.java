@@ -29,7 +29,7 @@ public class UserAdministrationService {
     @Transactional(readOnly = true)
     public UserDetailDTO getUserDetail(String employeeId) {
         return userMapper.toDetailDto(userRepository.findByEmployeeId(employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
+                () -> new ResourceNotFoundException("error.user.not-found")
         ));
     }
 
@@ -50,7 +50,7 @@ public class UserAdministrationService {
     @Transactional
     public UserCredentialsInternalResult createAdvisor(UserCreateDTO dto) {
         if (userRepository.existsByIco(dto.ico())) {
-            throw new ResourceConflictException("User with this IČO already exists.");
+            throw new ResourceConflictException("error.user.ico.conflict");
         }
 
         Long userId = userRepository.getNextSequenceValue();
@@ -78,33 +78,31 @@ public class UserAdministrationService {
     @Transactional
     public UserDetailDTO updateUserStatus(String employeeId, UserStatusUpdateDTO dto) {
         User user = userRepository.findByEmployeeId(employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
+                () -> new ResourceNotFoundException("error.user.not-found")
         );
 
         if (user.getUserType() == UserType.ADMIN) {
-            throw new InvalidInputValueException("Cannot change status of admin user.");
+            throw new InvalidInputValueException("error.user.status.admin-immutable");
         }
 
         if (user.isActive() == dto.isActive()) {
-            throw new InvalidInputValueException("User is already in the desired state.");
+            throw new InvalidInputValueException("error.user.status.redundant");
         }
 
         userRepository.forceUpdateStatus(employeeId, dto.isActive());
 
-        // We already checked the user exists so this will never throw
         return userMapper.toDetailDto(userRepository.findByEmployeeId(employeeId).orElseThrow());
     }
 
     @Transactional
     public UserCredentialsInternalResult resetUserPassword(String employeeId) {
         if (!userRepository.existsByEmployeeId(employeeId)) {
-            throw new ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("error.user.not-found");
         }
 
         String password = randomSecureStringGenerator.generateRandomPassword(MIN_PASSWORD_LENGTH);
         userRepository.forceUpdatePassword(employeeId, passwordEncoder.encode(password));
 
-        // We already checked the user exists so this will never throw
         UserDetailDTO detail = userMapper.toDetailDto(userRepository.findByEmployeeId(employeeId).orElseThrow());
 
         return new UserCredentialsInternalResult(detail, password);
@@ -122,12 +120,11 @@ public class UserAdministrationService {
     @Transactional
     public UserDetailDTO updateUserEmail(String employeeId, UserEmailUpdateDTO dto) {
         User user = userRepository.findByEmployeeId(employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
+                () -> new ResourceNotFoundException("error.user.not-found")
         );
 
         if (!user.getVersion().equals(dto.version())) {
-            throw new ResourceVersionMismatchException("User record has been updated since last read. " +
-                    "Please refresh and retry.");
+            throw new ResourceVersionMismatchException("error.concurrency.version-mismatch");
         }
 
         user.setEmail(dto.email());

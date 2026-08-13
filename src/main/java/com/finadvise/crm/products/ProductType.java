@@ -19,6 +19,6 @@ public class ProductType {
     private Long id;
 
     @Column(name = "NAME", nullable = false, unique = true, length = 50)
-    @NotBlank(message = "Product type name cannot be blank")
+    @NotBlank(message = "product-type.name.required")
     private String name;
 }

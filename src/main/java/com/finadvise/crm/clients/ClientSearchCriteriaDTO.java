@@ -4,30 +4,28 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ClientSearchCriteriaDTO(
-        @Size(max = 20, message = "Employee ID has wrong size or pattern")
+        @Size(max = 20, message = "client.search.advisor-id.size")
         @Pattern(
                 regexp = "^[a-zA-Z0-9\\-]+$",
-                message = "Employee ID has wrong size or pattern"
+                message = "client.search.advisor-id.format"
         )
         String advisorEmployeeId,
 
-        @Size(max = 150, message = "Product name must be at most 150 characters long")
+        @Size(max = 150, message = "client.search.name.size")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\d\\s\\-']+$",
-                message = "Product name contains invalid characters." +
-                        "Please use only standard letters, digits and basic punctuation."
+                message = "client.search.name.format"
         )
         String name,
 
-        @Size(max = 10, message = "Personal ID has wrong size or pattern")
-        @Pattern(regexp = "\\d{10}", message = "Personal ID has wrong size or pattern")
+        @Size(max = 10, message = "client.search.personal-id.size")
+        @Pattern(regexp = "\\d{10}", message = "client.search.personal-id.format")
         String personalId,
 
-        @Size(max = 100, message = "City name must be at most 100 characters long")
+        @Size(max = 100, message = "client.search.city.size")
         @Pattern(
                 regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$",
-                message = "City name contains invalid characters." +
-                        "Please use only standard letters, digits and basic punctuation."
+                message = "client.search.city.format"
         )
         String city,
         ClientStatus status

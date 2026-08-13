@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record FullBudgetUpdateDTO(
-        @NotNull(message = "Incomes list is required")
+        @NotNull(message = "budget.incomes.required")
         @Valid
         List<IncomeUpdateDTO> incomes,
 
-        @NotNull(message = "Expenses list is required")
+        @NotNull(message = "budget.expenses.required")
         @Valid
         List<ExpenseUpdateDTO> expenses
 ) {}

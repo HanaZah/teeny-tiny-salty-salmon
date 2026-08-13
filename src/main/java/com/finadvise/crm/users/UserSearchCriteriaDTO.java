@@ -4,11 +4,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UserSearchCriteriaDTO(
-        @Size(max = 100, message = "Search query is too long")
+        @Size(max = 100, message = "user.search.name.size")
         String name,
 
-        @Size(max = 8, message = "IČO must be at most 8 digits long")
-        @Pattern(regexp = "\\d{0,8}", message = "IČO consist of at most 8 digits")
+        @Size(max = 8, message = "user.search.ico.size")
+        @Pattern(regexp = "\\d{0,8}", message = "user.search.ico.format")
         String ico,
         UserStatus status
 ) {}

@@ -8,23 +8,22 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public record ClientIdCardUpdateDTO(
-        @NotNull(message = "Version is required for concurrency control")
+        @NotNull(message = "client.version.required")
         Integer version,
 
-        @NotBlank(message = "ID card number is required")
-        @Size(min = 9, max = 9, message = "ID card number must be exactly 9 characters long")
-        @Pattern(regexp = "^\\d{9}$", message = "ID card number must consist of exactly 9 digits")
+        @NotBlank(message = "client.id-card-number.required")
+        @Size(min = 9, max = 9, message = "client.id-card-number.size")
+        @Pattern(regexp = "^\\d{9}$", message = "client.id-card-number.format")
         String idCardNumber,
 
-        @NotNull(message = "ID card issue date is required")
+        @NotNull(message = "client.id-card-issue-date.required")
         LocalDate idCardIssueDate,
 
-        @NotNull(message = "ID card expiry date is required")
+        @NotNull(message = "client.id-card-expiry-date.required")
         LocalDate idCardExpiryDate,
 
-        @NotBlank(message = "ID card issuer is required")
-        @Size(max = 100, message = "ID card issuer must be at most 100 characters long")
-        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "ID card issuer contains invalid characters. " +
-                "Please use only standard letters, digits and basic punctuation.")
+        @NotBlank(message = "client.id-card-issuer.required")
+        @Size(max = 100, message = "client.id-card-issuer.size")
+        @Pattern(regexp = "^[\\p{L}\\p{M}\\d\\s\\-'.]+$", message = "client.id-card-issuer.format")
         String idCardIssuer
 ) {}

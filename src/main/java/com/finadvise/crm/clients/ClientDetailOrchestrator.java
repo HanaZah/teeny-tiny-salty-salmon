@@ -54,8 +54,7 @@ class ClientDetailOrchestrator {
         );
 
         User advisor = userReadFacade.findByEmployeeId(employeeId).orElseThrow(
-                () -> new SystemIntegrityException("Critical system failure: " +
-                        "Authenticated user record is missing from the database")
+                () -> new SystemIntegrityException("error.system.user-missing")
         );
 
         return getClientDetail(
@@ -68,7 +67,7 @@ class ClientDetailOrchestrator {
     @Transactional
     public ClientDetailDTO updateClientGeneralInfo(ClientGeneralUpdateDTO dto, String clientUid, String employeeId) {
         Client client = clientService.getDetailedClientByClientUidAndEmployeeId(clientUid, employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("Client not found or access denied")
+                () -> new ResourceNotFoundException("error.client.not-found")
         );
 
         clientService.validateGeneralInfo(dto.birthDate(), dto.personalId(), client.getPersonalId());
@@ -112,7 +111,7 @@ class ClientDetailOrchestrator {
     @Transactional
     public ClientDetailDTO updateClientIdCard(ClientIdCardUpdateDTO dto, String clientUid, String employeeId) {
         Client client = clientService.getDetailedClientByClientUidAndEmployeeId(clientUid, employeeId).orElseThrow(
-                () -> new ResourceNotFoundException("Client not found or access denied")
+                () -> new ResourceNotFoundException("error.client.not-found")
         );
 
         clientService.validateClientIdCard(

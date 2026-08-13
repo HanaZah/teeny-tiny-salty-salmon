@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record UserEmailUpdateDTO(
-        @NotNull(message = "Version is required")
+        @NotNull(message = "user.version.required")
         Integer version,
 
-        @NotBlank(message = "Email is required")
-        @Email(message = "Must be a valid email format")
+        @NotBlank(message = "user.email.required")
+        @Email(message = "user.email.format")
         String email
 ) {}
