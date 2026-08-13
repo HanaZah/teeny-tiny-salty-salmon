@@ -1,5 +1,6 @@
 package com.finadvise.crm.addresses;
 
+import com.finadvise.crm.common.SystemIntegrityException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,6 +76,7 @@ class AddressServiceTest {
         )).thenReturn(Optional.of(mockAddress));
 
         when(addressMapper.toDto(mockAddress)).thenReturn(expectedDTO);
+        when(addressValidator.validate(inputDTO)).thenReturn(inputDTO);
 
         AddressDTO result = addressService.findOrCreateAddress(inputDTO);
 
@@ -92,6 +94,7 @@ class AddressServiceTest {
         when(addressMapper.toEntity(inputDTO)).thenReturn(mockAddress);
         when(addressPersistHelper.saveAndFlushRequiresNew(mockAddress)).thenReturn(mockAddress);
         when(addressMapper.toDto(mockAddress)).thenReturn(expectedDTO);
+        when(addressValidator.validate(inputDTO)).thenReturn(inputDTO);
 
         AddressDTO result = addressService.findOrCreateAddress(inputDTO);
 
@@ -112,6 +115,7 @@ class AddressServiceTest {
         when(addressPersistHelper.saveAndFlushRequiresNew(mockAddress))
                 .thenThrow(new DataIntegrityViolationException("Unique constraint violated"));
         when(addressMapper.toDto(mockAddress)).thenReturn(expectedDTO);
+        when(addressValidator.validate(inputDTO)).thenReturn(inputDTO);
 
         AddressDTO result = addressService.findOrCreateAddress(inputDTO);
 
@@ -122,16 +126,17 @@ class AddressServiceTest {
     }
 
     @Test
-    void findOrCreateAddress_ConcurrentInsertRecoveryFails_ThrowsIllegalStateException() {
+    void findOrCreateAddress_ConcurrentInsertRecoveryFails_ThrowsSystemIntegrityException() {
         when(addressRepository.findExistingAddressCaseInsensitive(
                 "Main Street", "Prague", "110 00", "123/A"
         )).thenReturn(Optional.empty());
 
         when(addressMapper.toEntity(inputDTO)).thenReturn(mockAddress);
+        when(addressValidator.validate(inputDTO)).thenReturn(inputDTO);
         when(addressPersistHelper.saveAndFlushRequiresNew(mockAddress))
                 .thenThrow(new DataIntegrityViolationException("Unique constraint violated"));
 
-        assertThrows(IllegalStateException.class, () ->
+        assertThrows(SystemIntegrityException.class, () ->
                 addressService.findOrCreateAddress(inputDTO)
         );
         verify(addressRepository, times(2))

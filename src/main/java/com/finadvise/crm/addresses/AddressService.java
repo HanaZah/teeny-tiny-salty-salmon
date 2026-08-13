@@ -1,5 +1,6 @@
 package com.finadvise.crm.addresses;
 
+import com.finadvise.crm.common.SystemIntegrityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ class AddressService implements AddressFacade {
                     dto.city().trim(),
                     dto.postalCode().trim(),
                     dto.houseNumber().trim()
-            ).orElseThrow(() -> new IllegalStateException(
+            ).orElseThrow(() -> new SystemIntegrityException(
                     "Address recovery fetch failed after constraint violation.", e));
 
             return addressMapper.toDto(existingAddress);
