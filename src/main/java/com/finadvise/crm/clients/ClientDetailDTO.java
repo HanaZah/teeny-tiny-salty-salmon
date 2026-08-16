@@ -2,6 +2,7 @@ package com.finadvise.crm.clients;
 
 import com.finadvise.crm.addresses.AddressDTO;
 import com.finadvise.crm.budget.FullBudgetDTO;
+import com.finadvise.crm.products.ProductsStatisticsDTO;
 import com.finadvise.crm.users.AdvisorSummaryDTO;
 
 import java.time.LocalDate;
@@ -25,5 +26,6 @@ public record ClientDetailDTO(
         AdvisorSummaryDTO advisor,
         AddressDTO permanentAddress,
         AddressDTO contactAddress,
-        FullBudgetDTO budget
+        FullBudgetDTO budget,
+        ProductsStatisticsDTO productsStatistics
 ) {}

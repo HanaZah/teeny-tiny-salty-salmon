@@ -5,6 +5,10 @@ import com.finadvise.crm.TestFixtureFactory;
 import com.finadvise.crm.addresses.Address;
 import com.finadvise.crm.addresses.AddressInputDTO;
 import com.finadvise.crm.common.InvalidInputValueException;
+import com.finadvise.crm.products.Product;
+import com.finadvise.crm.products.ProductReadFacade;
+import com.finadvise.crm.products.ProductType;
+import com.finadvise.crm.products.Provider;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserType;
 import jakarta.persistence.EntityManager;
@@ -21,6 +25,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,8 +39,9 @@ public class ClientDetailOrchestratorIT extends AbstractIntegrationTest {
 
     @Autowired private ClientDetailOrchestrator orchestrator;
 
-    // Spy on the service to verify delegation without breaking the actual integration flow
+    // Spy on the services to verify delegation without breaking the actual integration flow
     @MockitoSpyBean private ClientService clientService;
+    @MockitoSpyBean private ProductReadFacade productReadFacade;
 
     @Autowired private EntityManager entityManager;
     @Autowired private TransactionTemplate transactionTemplate;
@@ -75,13 +81,34 @@ public class ClientDetailOrchestratorIT extends AbstractIntegrationTest {
             entityManager.persist(statusClient);
 
             entityManager.flush();
+
+            // Cross-package product seeding via EntityManager
+            ProductType dbType = ProductType.builder().name("ORCH_TYPE").build();
+            entityManager.persist(dbType);
+
+            Provider dbProvider = Provider.builder().name("ORCH_PROV").build();
+            entityManager.persist(dbProvider);
+
+            Product targetProduct = Product.builder()
+                    .name("Orchestrator Product")
+                    .amount(new BigDecimal("1500.00"))
+                    .startDate(LocalDate.now().minusMonths(1))
+                    .endDate(null)
+                    .productType(dbType)
+                    .provider(dbProvider)
+                    .client(targetClient)
+                    .advisor(testAdvisor1)
+                    .build();
+            entityManager.persist(targetProduct);
+
+            entityManager.flush();
         });
     }
 
     @BeforeEach
     void resetSpy() {
         // Clear spy invocations between tests to ensure accurate verification counts
-        Mockito.clearInvocations(clientService);
+        Mockito.clearInvocations(clientService, productReadFacade);
     }
 
     // --- 1. GLOBAL SECURITY CONSTRAINTS ---
@@ -118,8 +145,16 @@ public class ClientDetailOrchestratorIT extends AbstractIntegrationTest {
         assertNotNull(result.permanentAddress());
         assertNotNull(result.advisor());
 
+        // Verify product statistics hydration
+        assertNotNull(result.productsStatistics());
+        assertEquals(1L, result.productsStatistics().total());
+        assertEquals(1L, result.productsStatistics().active());
+        assertEquals(1L, result.productsStatistics().activeManagedByRequester());
+        assertEquals(new BigDecimal("1500"), result.productsStatistics().totalMonthlyPayment());
+
         // Verify delegation
         verify(clientService).getDetailedClient(targetClient.getClientUid(), testAdvisor1.getEmployeeId(), false);
+        verify(productReadFacade).getProductsStatisticsForClient(targetClient.getClientUid(), testAdvisor1.getEmployeeId());
     }
 
     // --- 3. CREATE CLIENT ---

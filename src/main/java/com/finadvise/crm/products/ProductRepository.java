@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
@@ -22,4 +23,21 @@ interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificati
     @Override
     @EntityGraph(attributePaths = {"provider", "productType", "client", "advisor"})
     @NonNull Page<Product> findAll(@NonNull Specification<Product> spec, @NonNull Pageable pageable);
+
+    @Query("""
+        SELECT new com.finadvise.crm.products.ProductsStatisticsDTO(
+            COUNT(p),
+            COUNT(CASE WHEN p.startDate <= :today AND (p.endDate IS NULL OR p.endDate >= :today) THEN 1 END),
+            COUNT(CASE WHEN p.startDate <= :today AND (p.endDate IS NULL OR p.endDate >= :today) AND a.employeeId = :requesterEmployeeId THEN 1 END),
+            SUM(CASE WHEN p.startDate <= :today AND (p.endDate IS NULL OR p.endDate >= :today) THEN p.amount END)
+        )
+        FROM Product p
+        LEFT JOIN p.advisor a
+        WHERE p.client.clientUid = :clientUid
+    """)
+    ProductsStatisticsDTO getClientProductStatistics(
+            @Param("clientUid") String clientUid,
+            @Param("requesterEmployeeId") String requesterEmployeeId,
+            @Param("today") LocalDate today
+    );
 }

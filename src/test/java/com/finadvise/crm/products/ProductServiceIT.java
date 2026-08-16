@@ -50,6 +50,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
     private User testAdvisor2;
     private Client testClient1;
     private Client testClient2;
+    private Client updateClient;
     private ProductType dbType;
     private Provider dbProvider;
 
@@ -57,6 +58,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
     private Product expiredProductAdv1;
     private Product crossClientProduct;
     private Product externalProduct;
+    private Product updateProduct; // for write tests
     private Product productAdv2;
 
     @BeforeAll
@@ -87,6 +89,9 @@ public class ProductServiceIT extends AbstractIntegrationTest {
             // Assign testClient2 initially to Advisor 1 to create the cross-client product
             testClient2 = TestFixtureFactory.createIntegrationClient(602L, "UID-002", testAdvisor1, testAddress);
             entityManager.persist(testClient2);
+
+            updateClient = TestFixtureFactory.createIntegrationClient(603L, "UID-003", testAdvisor1, testAddress);
+            entityManager.persist(updateClient);
 
             // Flush the entities to the database so the repositories can safely reference them
             entityManager.flush();
@@ -127,6 +132,16 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                     .provider(dbProvider)
                     .client(testClient1)
                     .advisor(null) // Unmanaged
+                    .build());
+
+            updateProduct = productRepository.save(Product.builder().name("Update Prod")
+                    .amount(new BigDecimal("1000.00"))
+                    .startDate(LocalDate.now().minusMonths(1))
+                    .endDate(null)
+                    .productType(dbType)
+                    .provider(dbProvider)
+                    .client(updateClient)
+                    .advisor(testAdvisor1)
                     .build());
 
             crossClientProduct = productRepository.save(Product.builder()
@@ -195,7 +210,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                 "New Internal", new BigDecimal("150.00"), LocalDate.now(), null, dbType.getId(), dbProvider.getId(), false
         );
 
-        ProductDTO result = productService.createProduct(dto, testAdvisor1.getEmployeeId(), testClient1.getClientUid());
+        ProductDTO result = productService.createProduct(dto, testAdvisor1.getEmployeeId(), updateClient.getClientUid());
 
         assertNotNull(result.id());
         Product dbProduct = productRepository.findById(result.id()).orElseThrow();
@@ -210,7 +225,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                 "New External", new BigDecimal("250.00"), LocalDate.now(), null, dbType.getId(), dbProvider.getId(), true
         );
 
-        ProductDTO result = productService.createProduct(dto, testAdvisor1.getEmployeeId(), testClient1.getClientUid());
+        ProductDTO result = productService.createProduct(dto, testAdvisor1.getEmployeeId(), updateClient.getClientUid());
 
         assertNotNull(result.id());
         Product dbProduct = productRepository.findById(result.id()).orElseThrow();
@@ -234,7 +249,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
         );
 
         assertThrows(InvalidInputValueException.class, () ->
-                productService.createProduct(dto, testAdvisor1.getEmployeeId(), testClient1.getClientUid())
+                productService.createProduct(dto, testAdvisor1.getEmployeeId(), updateClient.getClientUid())
         );
 
         // Reset the clock
@@ -250,25 +265,25 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                 "Updated Name", new BigDecimal("1234.56"), LocalDate.now(), null, dbType.getId(), dbProvider.getId()
         );
 
-        ProductDTO result = productService.updateProduct(activeProductAdv1.getId(), dto, testAdvisor1.getEmployeeId());
+        ProductDTO result = productService.updateProduct(updateProduct.getId(), dto, testAdvisor1.getEmployeeId());
 
         assertEquals("Updated Name", result.name());
         assertEquals(new BigDecimal("1234.56"), result.amount());
 
-        Product dbProduct = productRepository.findById(activeProductAdv1.getId()).orElseThrow();
+        Product dbProduct = productRepository.findById(updateProduct.getId()).orElseThrow();
         assertEquals("Updated Name", dbProduct.getName());
     }
 
     @Test
-    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    @WithMockUser(username = "IT-ADV-2", authorities = "ADVISOR")
     void updateProduct_WrongOwnership_ThrowsResourceNotFound() {
         ProductUpdateDTO dto = new ProductUpdateDTO(
                 "Hacked", BigDecimal.TEN, LocalDate.now(), null, dbType.getId(), dbProvider.getId()
         );
 
-        // Advisor 1 trying to update Product managed by Advisor 2
+        // Advisor 2 trying to update Product managed by Advisor 1
         assertThrows(ResourceNotFoundException.class, () ->
-                productService.updateProduct(productAdv2.getId(), dto, testAdvisor1.getEmployeeId())
+                productService.updateProduct(updateProduct.getId(), dto, testAdvisor2.getEmployeeId())
         );
     }
 
@@ -280,7 +295,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
         );
 
         assertThrows(InvalidInputValueException.class, () ->
-                productService.updateProduct(activeProductAdv1.getId(), dto, testAdvisor1.getEmployeeId())
+                productService.updateProduct(updateProduct.getId(), dto, testAdvisor1.getEmployeeId())
         );
     }
 
@@ -347,5 +362,55 @@ public class ProductServiceIT extends AbstractIntegrationTest {
         assertTrue(activeResult.getTotalElements() >= 1);
         assertTrue(activeResult.getContent().stream().anyMatch(p -> p.id().equals(activeProductAdv1.getId())));
         assertFalse(activeResult.getContent().stream().anyMatch(p -> p.id().equals(expiredProductAdv1.getId())));
+    }
+
+    // --- 5. GET PRODUCTS STATISTICS ---
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    void getProductsStatisticsForClient_Advisor_CalculatesCorrectly() {
+        // testClient1 has 3 products total:
+        // 1 active managed by ADV-1 (1000.00),
+        // 1 expired managed by ADV-1 (500.00),
+        // 1 active external with null advisor (200.00).
+        ProductsStatisticsDTO stats = productService.getProductsStatisticsForClient(testClient1.getClientUid(), testAdvisor1.getEmployeeId());
+
+        assertNotNull(stats);
+        assertEquals(3L, stats.total());
+        assertEquals(2L, stats.active());
+        assertEquals(1L, stats.activeManagedByRequester()); // Only the 1000.00 product is active AND managed by ADV-1
+        assertEquals(new BigDecimal("1200"), stats.totalMonthlyPayment()); // 1000.00 + 200.00
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADM-1", authorities = "ADMIN")
+    void getProductsStatisticsForClient_Admin_CalculatesCorrectly() {
+        ProductsStatisticsDTO stats = productService.getProductsStatisticsForClient(testClient1.getClientUid(), testAdmin.getEmployeeId());
+
+        assertNotNull(stats);
+        assertEquals(3L, stats.total());
+        assertEquals(2L, stats.active());
+        assertEquals(0L, stats.activeManagedByRequester()); // Admin manages nothing
+        assertEquals(new BigDecimal("1200"), stats.totalMonthlyPayment());
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    void getProductsStatisticsForClient_EmptyClient_ReturnsZeros() {
+        ProductsStatisticsDTO stats = productService.getProductsStatisticsForClient("UNKNOWN_UID", testAdvisor1.getEmployeeId());
+
+        assertNotNull(stats);
+        assertEquals(0L, stats.total());
+        assertEquals(0L, stats.active());
+        assertEquals(0L, stats.activeManagedByRequester());
+        assertEquals(BigDecimal.ZERO, stats.totalMonthlyPayment());
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    void getProductsStatisticsForClient_SecurityMismatch_ThrowsAccessDenied() {
+        assertThrows(AccessDeniedException.class, () ->
+                productService.getProductsStatisticsForClient(testClient1.getClientUid(), "IT-ADV-2")
+        );
     }
 }

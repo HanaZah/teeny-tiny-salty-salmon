@@ -5,6 +5,9 @@ import com.finadvise.crm.TestFixtureFactory;
 import com.finadvise.crm.addresses.Address;
 import com.finadvise.crm.addresses.AddressInputDTO;
 import com.finadvise.crm.common.ErrorCodes;
+import com.finadvise.crm.products.Product;
+import com.finadvise.crm.products.ProductType;
+import com.finadvise.crm.products.Provider;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserType;
 import jakarta.persistence.EntityManager;
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -83,6 +87,27 @@ class ClientControllerIT extends AbstractIntegrationTest {
             entityManager.persist(updateClient);
 
             entityManager.flush();
+
+            // Setup Product for Client Detail Statistics verification
+            ProductType dbType = ProductType.builder().name("CTRL_TYPE").build();
+            entityManager.persist(dbType);
+
+            Provider dbProvider = Provider.builder().name("CTRL_PROV").build();
+            entityManager.persist(dbProvider);
+
+            Product testProduct = Product.builder()
+                    .name("Controller Product")
+                    .amount(new BigDecimal("2000.00"))
+                    .startDate(LocalDate.now().minusMonths(1))
+                    .endDate(null)
+                    .productType(dbType)
+                    .provider(dbProvider)
+                    .client(testClient1)
+                    .advisor(testAdvisor1)
+                    .build();
+            entityManager.persist(testProduct);
+
+            entityManager.flush();
         });
     }
 
@@ -133,7 +158,12 @@ class ClientControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.clientUid").value(testClient1.getClientUid()))
                 .andExpect(jsonPath("$.budget").exists())
-                .andExpect(jsonPath("$.permanentAddress").exists());
+                .andExpect(jsonPath("$.permanentAddress").exists())
+                .andExpect(jsonPath("$.productsStatistics").exists())
+                .andExpect(jsonPath("$.productsStatistics.total").value(1))
+                .andExpect(jsonPath("$.productsStatistics.active").value(1))
+                .andExpect(jsonPath("$.productsStatistics.activeManagedByRequester").value(1))
+                .andExpect(jsonPath("$.productsStatistics.totalMonthlyPayment").value(2000.0));
     }
 
     @Test
@@ -141,7 +171,12 @@ class ClientControllerIT extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/clients/" + testClient1.getClientUid())
                         .with(adminJwt()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.clientUid").value(testClient1.getClientUid()));
+                .andExpect(jsonPath("$.clientUid").value(testClient1.getClientUid()))
+                .andExpect(jsonPath("$.productsStatistics").exists())
+                .andExpect(jsonPath("$.productsStatistics.total").value(1))
+                .andExpect(jsonPath("$.productsStatistics.active").value(1))
+                .andExpect(jsonPath("$.productsStatistics.activeManagedByRequester").value(0)) // Admin doesn't manage products
+                .andExpect(jsonPath("$.productsStatistics.totalMonthlyPayment").value(2000.0));
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.finadvise.crm.clients;
 import com.finadvise.crm.addresses.AddressDTO;
 import com.finadvise.crm.budget.FullBudgetDTO;
 import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
+import com.finadvise.crm.products.ProductsStatisticsDTO;
 import com.finadvise.crm.users.AdvisorSummaryDTO;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +26,15 @@ class ClientMapper {
             AdvisorSummaryDTO advisor,
             AddressDTO permanentAddress,
             AddressDTO contactAddress,
-            FullBudgetDTO budget) {
+            FullBudgetDTO budget,
+            ProductsStatisticsDTO products) {
         // all fields are mandatory
-        if (client == null || advisor == null || permanentAddress == null || contactAddress == null || budget == null) {
+        if (client == null
+                || advisor == null
+                || permanentAddress == null
+                || contactAddress == null
+                || budget == null
+                || products == null) {
             return null;
         }
 
@@ -50,7 +57,8 @@ class ClientMapper {
                 advisor,
                 permanentAddress,
                 contactAddress,
-                budget
+                budget,
+                products
         );
     }
 

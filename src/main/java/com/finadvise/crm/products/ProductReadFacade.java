@@ -9,5 +9,5 @@ public interface ProductReadFacade {
     List<DynamicDictionaryItemDTO> getAllProductTypes();
     List<DynamicDictionaryItemDTO> getAllProductProviders();
     List<StaticDictionaryItemDTO> getAllProductStates();
-
+    ProductsStatisticsDTO getProductsStatisticsForClient(String clientUid, String requesterEmployeeId);
 }

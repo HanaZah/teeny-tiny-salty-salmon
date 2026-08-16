@@ -362,4 +362,23 @@ class ProductServiceTest {
                 productService.createProduct(dto, mockAdvisor.getEmployeeId(), mockClient.getClientUid())
         );
     }
+
+    // --- GET PRODUCTS STATISTICS TESTS ---
+
+    @Test
+    void getProductsStatisticsForClient_Success_DelegatesToRepository() {
+        mockClock();
+        ProductsStatisticsDTO expectedStats = new ProductsStatisticsDTO(5L, 3L, 2L, new BigDecimal("1500.00"));
+
+        when(productRepository.getClientProductStatistics(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), LocalDate.now(clock)))
+                .thenReturn(expectedStats);
+
+        ProductsStatisticsDTO result = productService.getProductsStatisticsForClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId());
+
+        assertNotNull(result);
+        assertEquals(expectedStats, result);
+
+        // Verifies the clock output was properly extracted and passed to the repository query
+        verify(productRepository).getClientProductStatistics(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), LocalDate.of(2026, 8, 9));
+    }
 }

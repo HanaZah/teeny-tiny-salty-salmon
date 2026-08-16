@@ -9,6 +9,8 @@ import com.finadvise.crm.budget.BudgetReadFacade;
 import com.finadvise.crm.budget.FullBudgetDTO;
 import com.finadvise.crm.common.ResourceNotFoundException;
 import com.finadvise.crm.common.SystemIntegrityException;
+import com.finadvise.crm.products.ProductReadFacade;
+import com.finadvise.crm.products.ProductsStatisticsDTO;
 import com.finadvise.crm.users.AdvisorSummaryDTO;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserReadFacade;
@@ -21,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +41,7 @@ class ClientDetailOrchestratorTest {
     @Mock private BudgetReadFacade budgetReadFacade;
     @Mock private ClientMapper clientMapper;
     @Mock private ClientService clientService;
+    @Mock private ProductReadFacade productReadFacade;
 
     @InjectMocks
     private ClientDetailOrchestrator orchestrator;
@@ -61,7 +65,8 @@ class ClientDetailOrchestratorTest {
                 new AdvisorSummaryDTO("EMP-123", "Jane", "Doe"),
                 new AddressDTO(1L, "Test Street", "123/A", "Test City", "123 45"),
                 new AddressDTO(1L, "Test Street", "123/A", "Test City", "123 45"),
-                new FullBudgetDTO(List.of(), List.of(), 0)
+                new FullBudgetDTO(List.of(), List.of(), 0),
+                new ProductsStatisticsDTO(12L, 4L, 3L, BigDecimal.valueOf(1250L))
         );
     }
 
@@ -76,10 +81,12 @@ class ClientDetailOrchestratorTest {
         when(addressFacade.mapToDto(mockClient.getResidentialAddress())).thenReturn(mockDetailDTO.permanentAddress());
         when(addressFacade.mapToDto(mockClient.getContactAddress())).thenReturn(mockDetailDTO.contactAddress());
         when(budgetReadFacade.getFullBudgetForClient(mockClient.getClientUid())).thenReturn(mockDetailDTO.budget());
+        when(productReadFacade.getProductsStatisticsForClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId()))
+                .thenReturn(mockDetailDTO.productsStatistics());
 
         when(clientMapper.toDetailDTO(
                 eq(mockClient), eq(mockDetailDTO.advisor()), eq(mockDetailDTO.permanentAddress()),
-                eq(mockDetailDTO.contactAddress()), eq(mockDetailDTO.budget())
+                eq(mockDetailDTO.contactAddress()), eq(mockDetailDTO.budget()), eq(mockDetailDTO.productsStatistics())
         )).thenReturn(mockDetailDTO);
 
         ClientDetailDTO result = orchestrator.getClientDetail(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), false);
@@ -109,7 +116,7 @@ class ClientDetailOrchestratorTest {
 
         // Mock the internal getClientDetail call
         when(clientService.getDetailedClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), false)).thenReturn(mockClient);
-        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
+        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
 
         ClientDetailDTO result = orchestrator.createClient(createDTO, mockAdvisor.getEmployeeId());
 
@@ -161,7 +168,7 @@ class ClientDetailOrchestratorTest {
 
         // Mock internal getClientDetail
         when(clientService.getDetailedClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), false)).thenReturn(mockClient);
-        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
+        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
 
         ClientDetailDTO result = orchestrator.updateClientGeneralInfo(dto, mockClient.getClientUid(), mockAdvisor.getEmployeeId());
 
@@ -195,7 +202,7 @@ class ClientDetailOrchestratorTest {
 
         // Mock internal getClientDetail
         when(clientService.getDetailedClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), false)).thenReturn(mockClient);
-        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
+        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
 
         ClientDetailDTO result = orchestrator.updateClientGeneralInfo(dto, mockClient.getClientUid(), mockAdvisor.getEmployeeId());
 
@@ -235,7 +242,7 @@ class ClientDetailOrchestratorTest {
 
         // Mock internal getClientDetail
         when(clientService.getDetailedClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), false)).thenReturn(mockClient);
-        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
+        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
 
         ClientDetailDTO result = orchestrator.updateClientIdCard(dto, mockClient.getClientUid(), mockAdvisor.getEmployeeId());
 
@@ -257,7 +264,7 @@ class ClientDetailOrchestratorTest {
                 .thenReturn(mockClient);
         when(clientService.updateStatus(dto, mockClient)).thenReturn(mockClient);
 
-        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
+        when(clientMapper.toDetailDTO(any(), any(), any(), any(), any(), any())).thenReturn(mockDetailDTO);
 
         ClientDetailDTO result = orchestrator.updateClientStatus(dto, mockClient.getClientUid(), mockAdvisor.getEmployeeId());
 

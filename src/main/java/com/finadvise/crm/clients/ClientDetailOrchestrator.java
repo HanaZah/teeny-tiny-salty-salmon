@@ -4,6 +4,7 @@ import com.finadvise.crm.addresses.Address;
 import com.finadvise.crm.addresses.AddressFacade;
 import com.finadvise.crm.budget.BudgetReadFacade;
 import com.finadvise.crm.common.*;
+import com.finadvise.crm.products.ProductReadFacade;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserReadFacade;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ class ClientDetailOrchestrator {
     private final BudgetReadFacade budgetReadFacade;
     private final ClientMapper clientMapper;
     private final ClientService clientService;
+    private final ProductReadFacade productReadFacade;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN') and #employeeId == authentication.name" +
@@ -31,7 +33,8 @@ class ClientDetailOrchestrator {
                 userReadFacade.mapToAdvisorSummary(client.getAdvisor()),
                 addressFacade.mapToDto(client.getResidentialAddress()),
                 addressFacade.mapToDto(client.getContactAddress()),
-                budgetReadFacade.getFullBudgetForClient(clientUid)
+                budgetReadFacade.getFullBudgetForClient(clientUid),
+                productReadFacade.getProductsStatisticsForClient(clientUid, employeeId)
         );
     }
 

@@ -162,4 +162,11 @@ class ProductService implements ProductReadFacade {
     public List<StaticDictionaryItemDTO> getAllProductStates() {
         return Arrays.stream(ProductStatus.values()).map(productMapper::toStaticDictionaryItemDto).toList();
     }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN') and #requesterEmployeeId == authentication.name")
+    @Transactional(readOnly = true)
+    public ProductsStatisticsDTO getProductsStatisticsForClient(String clientUid, String requesterEmployeeId) {
+        return productRepository.getClientProductStatistics(clientUid, requesterEmployeeId, LocalDate.now(clock));
+    }
 }
