@@ -2,10 +2,12 @@ package com.finadvise.crm.budget;
 
 import com.finadvise.crm.clients.Client;
 import com.finadvise.crm.clients.ClientReadFacade;
+import com.finadvise.crm.common.ClientPortfolioUpdatedEvent;
 import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceNotFoundException;
 import com.finadvise.crm.dictionaries.DynamicDictionaryItemDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +28,7 @@ class BudgetService implements BudgetReadFacade {
     private final ExpenseTypeRepository expenseTypeRepository;
     private final BudgetMapper budgetMapper;
     private final ClientReadFacade clientReadFacade;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -132,6 +135,7 @@ class BudgetService implements BudgetReadFacade {
             throw new InvalidInputValueException("error.budget.invalid-type-id");
         }
 
+        eventPublisher.publishEvent(new ClientPortfolioUpdatedEvent(clientUid));
         return getFullBudgetForClient(clientUid);
     }
 }

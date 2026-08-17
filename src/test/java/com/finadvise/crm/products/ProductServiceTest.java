@@ -19,6 +19,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ class ProductServiceTest {
     @Mock private ProductMapper productMapper;
     @Mock private UserReadFacade userReadFacade;
     @Mock private ClientReadFacade clientReadFacade;
+    @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private Clock clock;
 
     @InjectMocks
@@ -74,8 +76,8 @@ class ProductServiceTest {
 
     private void mockClock() {
         Instant fixedInstant = Instant.parse("2026-08-09T10:00:00Z");
-        when(clock.instant()).thenReturn(fixedInstant);
-        when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
+        lenient().when(clock.instant()).thenReturn(fixedInstant);
+        lenient().when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
     }
 
     // --- UPDATE PRODUCT TESTS ---
@@ -109,6 +111,11 @@ class ProductServiceTest {
         assertEquals("Updated Name", mockProduct.getName());
         assertEquals(newType, mockProduct.getProductType());
         assertEquals(newProvider, mockProduct.getProvider());
+
+        // Verify event published
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("ClientPortfolioUpdatedEvent", eventCaptor.getValue().getClass().getSimpleName());
     }
 
     @Test
@@ -129,6 +136,11 @@ class ProductServiceTest {
         assertNotNull(result);
         verify(productTypeRepository, never()).existsById(anyLong());
         verify(providerRepository, never()).existsById(anyLong());
+
+        // Verify event published
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("ClientPortfolioUpdatedEvent", eventCaptor.getValue().getClass().getSimpleName());
     }
 
     @Test
@@ -139,6 +151,7 @@ class ProductServiceTest {
         assertThrows(ResourceNotFoundException.class, () ->
                 productService.updateProduct(999L, dto, "EMP-123")
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -152,6 +165,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.updateProduct(mockProduct.getId(), dto, mockAdvisor.getEmployeeId())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -164,6 +178,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.updateProduct(mockProduct.getId(), dto, mockAdvisor.getEmployeeId())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -176,6 +191,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.updateProduct(mockProduct.getId(), dto, mockAdvisor.getEmployeeId())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     // --- SEARCH PRODUCTS TESTS ---
@@ -194,6 +210,7 @@ class ProductServiceTest {
         assertEquals(1, result.getTotalElements());
         assertEquals(mockProductDTO, result.getContent().getFirst());
         verify(productRepository).findAll(ArgumentMatchers.<Specification<Product>>any(), any(Pageable.class));
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -211,6 +228,7 @@ class ProductServiceTest {
         assertEquals(1, result.getTotalElements());
         // Specification internally uses the modified DTO. Verifying behavior through successful mapping.
         verify(productRepository).findAll(ArgumentMatchers.<Specification<Product>>any(), any(Pageable.class));
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -222,6 +240,7 @@ class ProductServiceTest {
         Page<ProductDTO> result = productService.searchProducts(criteria, Pageable.unpaged(), "EMP-123", false);
 
         assertTrue(result.isEmpty());
+        verifyNoInteractions(eventPublisher);
     }
 
     // --- CREATE PRODUCT TESTS ---
@@ -251,6 +270,11 @@ class ProductServiceTest {
         verify(productRepository).saveAndFlush(captor.capture());
         Product savedProduct = captor.getValue();
         assertEquals(mockAdvisor, savedProduct.getAdvisor());
+
+        // Verify event published
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("ClientPortfolioUpdatedEvent", eventCaptor.getValue().getClass().getSimpleName());
     }
 
     @Test
@@ -276,6 +300,11 @@ class ProductServiceTest {
         verify(productRepository).saveAndFlush(captor.capture());
         Product savedProduct = captor.getValue();
         assertNull(savedProduct.getAdvisor()); // Manager must be null for external products
+
+        // Verify event published
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("ClientPortfolioUpdatedEvent", eventCaptor.getValue().getClass().getSimpleName());
     }
 
     @Test
@@ -286,6 +315,7 @@ class ProductServiceTest {
         assertThrows(SystemIntegrityException.class, () ->
                 productService.createProduct(dto, "UNKNOWN", "C-123")
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -298,6 +328,7 @@ class ProductServiceTest {
         assertThrows(ResourceNotFoundException.class, () ->
                 productService.createProduct(dto, mockAdvisor.getEmployeeId(), "UNKNOWN")
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -314,6 +345,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.createProduct(dto, mockAdvisor.getEmployeeId(), mockClient.getClientUid())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -330,6 +362,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.createProduct(dto, mockAdvisor.getEmployeeId(), mockClient.getClientUid())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -345,6 +378,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.createProduct(dto, mockAdvisor.getEmployeeId(), mockClient.getClientUid())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -361,6 +395,7 @@ class ProductServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 productService.createProduct(dto, mockAdvisor.getEmployeeId(), mockClient.getClientUid())
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     // --- GET PRODUCTS STATISTICS TESTS ---
@@ -380,5 +415,6 @@ class ProductServiceTest {
 
         // Verifies the clock output was properly extracted and passed to the repository query
         verify(productRepository).getClientProductStatistics(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), LocalDate.of(2026, 8, 9));
+        verifyNoInteractions(eventPublisher);
     }
 }

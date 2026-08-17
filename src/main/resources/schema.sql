@@ -189,7 +189,7 @@ DECLARE
     v_adv_active NUMBER(1);
     v_usr_role VARCHAR2(50 CHAR);
 BEGIN
-    :NEW.LAST_UPDATE := TRUNC(SYSDATE);
+    :NEW.LAST_UPDATE := COALESCE(:NEW.LAST_UPDATE, TRUNC(SYSDATE));
     IF :NEW.ID_CARD_ISSUE_DATE <= :NEW.BIRTH_DATE THEN
         raise_application_error(-20001, 'Client ID card issue date cannot precede or match birth date');
     END IF;

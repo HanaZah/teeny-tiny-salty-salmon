@@ -4,6 +4,7 @@ import com.finadvise.crm.AbstractIntegrationTest;
 import com.finadvise.crm.TestFixtureFactory;
 import com.finadvise.crm.addresses.Address;
 import com.finadvise.crm.clients.Client;
+import com.finadvise.crm.clients.ClientReadFacade;
 import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceNotFoundException;
 import com.finadvise.crm.users.User;
@@ -34,6 +35,8 @@ public class BudgetServiceIT extends AbstractIntegrationTest {
     @Autowired private ExpenseRepository expenseRepository;
     @Autowired private IncomeTypeRepository incomeTypeRepository;
     @Autowired private ExpenseTypeRepository expenseTypeRepository;
+
+    @Autowired private ClientReadFacade clientReadFacade;
 
     @Autowired private EntityManager entityManager;
     @Autowired private TransactionTemplate transactionTemplate;
@@ -164,6 +167,10 @@ public class BudgetServiceIT extends AbstractIntegrationTest {
         assertEquals(1, dbExpenses.size());
         assertEquals(1600, dbExpenses.getFirst().getAmount());
         assertFalse(dbExpenses.getFirst().isMandatory());
+
+        // Verify the client's version was bumped by the portfolio update event listener
+        Client dbClient = clientReadFacade.findByClientUidAndAdvisorEmployeeId(updateClient.getClientUid(), testAdvisor1.getEmployeeId()).orElseThrow();
+        assertTrue(dbClient.getVersion() > updateClient.getVersion());
     }
 
     @Test

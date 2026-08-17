@@ -2,6 +2,7 @@ package com.finadvise.crm.products;
 
 import com.finadvise.crm.clients.Client;
 import com.finadvise.crm.clients.ClientReadFacade;
+import com.finadvise.crm.common.ClientPortfolioUpdatedEvent;
 import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceNotFoundException;
 import com.finadvise.crm.common.SystemIntegrityException;
@@ -10,6 +11,7 @@ import com.finadvise.crm.dictionaries.StaticDictionaryItemDTO;
 import com.finadvise.crm.users.User;
 import com.finadvise.crm.users.UserReadFacade;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,6 +35,7 @@ class ProductService implements ProductReadFacade {
     private final UserReadFacade userReadFacade;
     private final ClientReadFacade clientReadFacade;
     private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
     @PreAuthorize( "hasAuthority('ADVISOR') and #employeeId == authentication.name")
     @Transactional
@@ -70,6 +73,7 @@ class ProductService implements ProductReadFacade {
 
         productRepository.saveAndFlush(product);
         product = productRepository.findByIdWithDetails(product.getId()).orElseThrow(); // this will never throw, we just saved
+        eventPublisher.publishEvent(new ClientPortfolioUpdatedEvent(product.getClient().getClientUid()));
 
         return productMapper.toDto(product,
                 userReadFacade.mapToAdvisorSummary(product.getAdvisor()),
@@ -137,6 +141,7 @@ class ProductService implements ProductReadFacade {
 
         productRepository.saveAndFlush(product);
         product = productRepository.findByIdWithDetails(product.getId()).orElseThrow();
+        eventPublisher.publishEvent(new ClientPortfolioUpdatedEvent(product.getClient().getClientUid()));
 
         return productMapper.toDto(
                 product,

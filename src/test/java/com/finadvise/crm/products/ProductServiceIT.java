@@ -4,6 +4,7 @@ import com.finadvise.crm.AbstractIntegrationTest;
 import com.finadvise.crm.TestFixtureFactory;
 import com.finadvise.crm.addresses.Address;
 import com.finadvise.crm.clients.Client;
+import com.finadvise.crm.clients.ClientReadFacade;
 import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceNotFoundException;
 import com.finadvise.crm.users.User;
@@ -40,6 +41,8 @@ public class ProductServiceIT extends AbstractIntegrationTest {
     @Autowired private ProductTypeRepository productTypeRepository;
     @Autowired private ProviderRepository providerRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+
+    @Autowired private ClientReadFacade clientReadFacade;
 
     // Use EntityManager and TransactionTemplate for cross-module seeding
     @Autowired private EntityManager entityManager;
@@ -210,12 +213,17 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                 "New Internal", new BigDecimal("150.00"), LocalDate.now(), null, dbType.getId(), dbProvider.getId(), false
         );
 
+        int initialVersion = updateClient.getVersion();
         ProductDTO result = productService.createProduct(dto, testAdvisor1.getEmployeeId(), updateClient.getClientUid());
 
         assertNotNull(result.id());
         Product dbProduct = productRepository.findById(result.id()).orElseThrow();
         assertNotNull(dbProduct.getAdvisor());
         assertEquals(testAdvisor1.getId(), dbProduct.getAdvisor().getId());
+
+        // Verify client version bumped via portfolio updated event listener
+        Client dbClient = clientReadFacade.findByClientUidAndAdvisorEmployeeId(updateClient.getClientUid(), testAdvisor1.getEmployeeId()).orElseThrow();
+        assertTrue(dbClient.getVersion() > initialVersion);
     }
 
     @Test
@@ -225,11 +233,16 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                 "New External", new BigDecimal("250.00"), LocalDate.now(), null, dbType.getId(), dbProvider.getId(), true
         );
 
+        int initialVersion = updateClient.getVersion();
         ProductDTO result = productService.createProduct(dto, testAdvisor1.getEmployeeId(), updateClient.getClientUid());
 
         assertNotNull(result.id());
         Product dbProduct = productRepository.findById(result.id()).orElseThrow();
         assertNull(dbProduct.getAdvisor());
+
+        // Verify client version bumped via portfolio updated event listener
+        Client dbClient = clientReadFacade.findByClientUidAndAdvisorEmployeeId(updateClient.getClientUid(), testAdvisor1.getEmployeeId()).orElseThrow();
+        assertTrue(dbClient.getVersion() > initialVersion);
     }
 
     @Test
@@ -265,6 +278,7 @@ public class ProductServiceIT extends AbstractIntegrationTest {
                 "Updated Name", new BigDecimal("1234.56"), LocalDate.now(), null, dbType.getId(), dbProvider.getId()
         );
 
+        int initialVersion = updateClient.getVersion();
         ProductDTO result = productService.updateProduct(updateProduct.getId(), dto, testAdvisor1.getEmployeeId());
 
         assertEquals("Updated Name", result.name());
@@ -272,6 +286,10 @@ public class ProductServiceIT extends AbstractIntegrationTest {
 
         Product dbProduct = productRepository.findById(updateProduct.getId()).orElseThrow();
         assertEquals("Updated Name", dbProduct.getName());
+
+        // Verify client version bumped via portfolio updated event listener
+        Client dbClient = clientReadFacade.findByClientUidAndAdvisorEmployeeId(updateClient.getClientUid(), testAdvisor1.getEmployeeId()).orElseThrow();
+        assertTrue(dbClient.getVersion() > initialVersion);
     }
 
     @Test

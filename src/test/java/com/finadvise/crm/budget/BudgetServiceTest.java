@@ -15,6 +15,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
@@ -32,6 +33,7 @@ class BudgetServiceTest {
     @Mock private ExpenseTypeRepository expenseTypeRepository; // mocked for injection even if not used in the tests
     @Mock private BudgetMapper budgetMapper;
     @Mock private ClientReadFacade clientReadFacade;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private BudgetService budgetService;
@@ -107,6 +109,12 @@ class BudgetServiceTest {
         List<Income> deletedIncomes = incomeListCaptor.getValue();
         assertEquals(1, deletedIncomes.size());
         assertEquals(3L, deletedIncomes.getFirst().getIncomeType().getId());
+
+        // Verify the event was published using Object captor
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        Object publishedEvent = eventCaptor.getValue();
+        assertEquals("ClientPortfolioUpdatedEvent", publishedEvent.getClass().getSimpleName());
     }
 
     @Test
@@ -123,7 +131,7 @@ class BudgetServiceTest {
                         budgetService.updateFullBudgetForClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), request),
                 "Unique income types constraint violated"
         );
-        verifyNoInteractions(clientReadFacade, incomeRepository, expenseRepository);
+        verifyNoInteractions(clientReadFacade, incomeRepository, expenseRepository, eventPublisher);
     }
 
     @Test
@@ -140,7 +148,7 @@ class BudgetServiceTest {
                         budgetService.updateFullBudgetForClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), request),
                 "Unique expense types constraint violated"
         );
-        verifyNoInteractions(clientReadFacade, incomeRepository, expenseRepository);
+        verifyNoInteractions(clientReadFacade, incomeRepository, expenseRepository, eventPublisher);
     }
 
     @Test
@@ -152,6 +160,7 @@ class BudgetServiceTest {
         assertThrows(ResourceNotFoundException.class, () ->
                 budgetService.updateFullBudgetForClient("UNKNOWN", mockAdvisor.getEmployeeId(), request)
         );
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
@@ -170,5 +179,6 @@ class BudgetServiceTest {
         assertThrows(InvalidInputValueException.class, () ->
                 budgetService.updateFullBudgetForClient(mockClient.getClientUid(), mockAdvisor.getEmployeeId(), request)
         );
+        verifyNoInteractions(eventPublisher);
     }
 }

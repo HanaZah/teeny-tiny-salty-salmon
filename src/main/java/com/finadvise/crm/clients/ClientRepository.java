@@ -3,6 +3,7 @@ package com.finadvise.crm.clients;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -87,4 +88,8 @@ interface ClientRepository extends JpaRepository<Client, Long>{
 
     @Query(value = "SELECT CLIENT_SEQ.NEXTVAL FROM dual", nativeQuery = true)
     Long getNextSequenceValue();
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Client c SET c.lastUpdate = :today, c.version = c.version + 1 WHERE c.clientUid = :clientUid")
+    void touchClientVersionAndLastUpdate(@Param("clientUid") String clientUid, @Param("today") LocalDate today);
 }
