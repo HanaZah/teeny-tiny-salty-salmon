@@ -45,4 +45,19 @@ public class UserController {
 
         return userService.updateUserProfile(principal.getName(), dto);
     }
+
+    @Operation(
+            summary = "Change current user password",
+            description = "Changes the password of the authenticated user."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation failed, incorrect payload format"),
+            @ApiResponse(responseCode = "409", description = "Version mismatch (Optimistic locking failure) or unique value conflict"),
+            @ApiResponse(responseCode = "500", description = "Critical failure, authenticated user record missing")
+    })
+    @PutMapping("/me/password")
+    public UserProfileDTO changePassword(@Valid @RequestBody PasswordChangeDTO dto, Principal principal) {
+        return userService.updateUserPassword(dto, principal.getName());
+    }
 }

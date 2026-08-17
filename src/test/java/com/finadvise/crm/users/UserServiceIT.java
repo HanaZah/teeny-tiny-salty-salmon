@@ -2,6 +2,7 @@ package com.finadvise.crm.users;
 
 import com.finadvise.crm.AbstractIntegrationTest;
 import com.finadvise.crm.TestFixtureFactory;
+import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceConflictException;
 import com.finadvise.crm.common.ResourceVersionMismatchException;
 import com.finadvise.crm.common.SystemIntegrityException;
@@ -10,7 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,30 +28,40 @@ public class UserServiceIT extends AbstractIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private User testAdvisor1;
     private User testAdvisor2;
     private User testAdmin;
+
+    private final String testPassword = "secret";
 
     @BeforeAll
     void setUpAll() {
         cleanDatabase();
 
         testAdvisor1 = TestFixtureFactory.createIntegrationUser(
-                100L, "IT-ADV-1", "hash", UserType.ADVISOR
+                100L, "IT-ADV-1", passwordEncoder.encode(testPassword), UserType.ADVISOR
         );
         userRepository.save(testAdvisor1);
 
         testAdvisor2 = TestFixtureFactory.createIntegrationUser(
-                101L, "IT-ADV-2", "hash", UserType.ADVISOR
+                101L, "IT-ADV-2", passwordEncoder.encode(testPassword), UserType.ADVISOR
         );
 
         userRepository.save(testAdvisor2);
 
         testAdmin = TestFixtureFactory.createIntegrationAdmin(
-                102L, "IT-ADM-1", "hash"
+                102L, "IT-ADM-1", passwordEncoder.encode(testPassword)
         );
         userRepository.save(testAdmin);
     }
+
+    // --- 1. GET ADMIN CONTACT ---
 
     @Test
     void getAdminContact_ReturnsActiveAdminDetails() {
@@ -58,6 +72,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
         assertEquals(testAdmin.getEmail(), contact.email());
     }
 
+    // --- 2. UPDATE USER PROFILE ---
     @Test
     @WithMockUser(username = "IT-ADV-1")
     void updateUserProfile_OptimisticLocking_IncrementsVersion() {
@@ -118,6 +133,56 @@ public class UserServiceIT extends AbstractIntegrationTest {
 
         assertThrows(SystemIntegrityException.class, () ->
                 userService.updateUserProfile("IT-ADV-3", updateDTO)
+        );
+    }
+
+    // --- 3. UPDATE USER PASSWORD ---
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR") // Assuming IT-ADV-1 is seeded
+    void updateUserPassword_HappyPath_UpdatesHashInDatabase() {
+        PasswordChangeDTO dto = new PasswordChangeDTO(testPassword, "NewStr0ngP@ss!");
+
+        UserProfileDTO result = userService.updateUserPassword(dto, testAdvisor1.getEmployeeId());
+
+        assertNotNull(result);
+
+        User dbUser = userRepository.findById(testAdvisor1.getId()).orElseThrow();
+        assertTrue(passwordEncoder.matches("NewStr0ngP@ss!", dbUser.getPasswordHash()));
+
+        // Cleanup: revert the password so we don't break subsequent tests
+        transactionTemplate.executeWithoutResult(status -> {
+            userRepository.forceUpdatePassword(testAdvisor1.getEmployeeId(), passwordEncoder.encode(testPassword));
+        });
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    void updateUserPassword_SamePasswordConflict_ThrowsException() {
+        PasswordChangeDTO dto = new PasswordChangeDTO(testPassword, testPassword);
+
+        assertThrows(ResourceConflictException.class, () ->
+                userService.updateUserPassword(dto, testAdvisor1.getEmployeeId())
+        );
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    void updateUserPassword_IncorrectCurrentPassword_ThrowsException() {
+        PasswordChangeDTO dto = new PasswordChangeDTO("wrong-password", "NewStr0ngP@ss!");
+
+        assertThrows(InvalidInputValueException.class, () ->
+                userService.updateUserPassword(dto, testAdvisor1.getEmployeeId())
+        );
+    }
+
+    @Test
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
+    void updateUserPassword_SecurityMismatch_ThrowsAccessDenied() {
+        PasswordChangeDTO dto = new PasswordChangeDTO(testPassword, "NewStr0ngP@ss!");
+
+        assertThrows(AccessDeniedException.class, () ->
+                userService.updateUserPassword(dto, testAdvisor2.getEmployeeId())
         );
     }
 }

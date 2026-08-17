@@ -1,6 +1,7 @@
 package com.finadvise.crm.users;
 
 import com.finadvise.crm.TestFixtureFactory;
+import com.finadvise.crm.common.InvalidInputValueException;
 import com.finadvise.crm.common.ResourceConflictException;
 import com.finadvise.crm.common.ResourceVersionMismatchException;
 import com.finadvise.crm.common.SystemIntegrityException;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -24,6 +26,9 @@ class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -40,6 +45,8 @@ class UserServiceTest {
                 mockUser.getIco(), mockUser.getEmail(), mockUser.getPhone(), null
         );
     }
+
+    // --- 1. GET USER PROFILE ---
 
     @Test
     void getUserProfile_UserExists_ReturnsMappedProfile() {
@@ -65,6 +72,8 @@ class UserServiceTest {
 
         assertThrows(SystemIntegrityException.class, () -> userService.getUserProfile(missingEmployeeId));
     }
+
+    // --- 2. UPDATE USER PROFILE ---
 
     @Test
     void updateUserProfile_ValidUpdate_SavesAndReturnsProfile() {
@@ -129,5 +138,48 @@ class UserServiceTest {
         when(userRepository.findByEmployeeId(missingEmployeeId)).thenReturn(Optional.empty());
 
         assertThrows(SystemIntegrityException.class, () -> userService.updateUserProfile(missingEmployeeId, updateDTO));
+    }
+
+    // --- 3. UPDATE USER PASSWORD ---
+
+    @Test
+    void updateUserPassword_ValidUpdate_SavesAndReturnsProfile() {
+        String newPasswordHash = "newPasswordHash";
+        PasswordChangeDTO dto = new PasswordChangeDTO("oldPassword", "newPassword");
+        AdvisorStatisticsProjection mockProjection = mock(AdvisorStatisticsProjection.class);
+
+        when(userRepository.findByEmployeeId(mockUser.getEmployeeId())).thenReturn(Optional.of(mockUser));
+        when(userRepository.getAdvisorStatistics(mockUser.getId())).thenReturn(mockProjection);
+        when(passwordEncoder.matches(dto.currentPassword(), mockUser.getPasswordHash())).thenReturn(true);
+        when(passwordEncoder.encode(dto.newPassword())).thenReturn(newPasswordHash);
+        when(userMapper.toProfileDto(any(User.class), any(AdvisorStatisticsDTO.class))).thenReturn(mockProfileDTO);
+
+        UserProfileDTO result = userService.updateUserPassword(dto, mockUser.getEmployeeId());
+        assertNotNull(result);
+        assertEquals(mockUser.getEmployeeId(), result.employeeId());
+
+        verify(userRepository).forceUpdatePassword(mockUser.getEmployeeId(), newPasswordHash);
+    }
+
+    @Test
+    void updateUserPassword_CurrentAndNewMatches_ThrowsConflictException() {
+        PasswordChangeDTO dto = new PasswordChangeDTO("samePassword", "samePassword");
+
+        assertThrows(ResourceConflictException.class, () ->
+                userService.updateUserPassword(dto, mockUser.getEmployeeId()));
+
+        verify(userRepository, never()).findByEmployeeId(anyString());
+        verify(userRepository, never()).forceUpdatePassword(anyString(), anyString());
+    }
+
+    @Test
+    void updateUserPassword_IncorrectCurrent_ThrowsInvalidInputException() {
+        PasswordChangeDTO dto = new PasswordChangeDTO("wrongPassword", "newPassword");
+
+        when(userRepository.findByEmployeeId(mockUser.getEmployeeId())).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches(dto.currentPassword(), mockUser.getPasswordHash())).thenReturn(false);
+
+        assertThrows(InvalidInputValueException.class, () ->
+                userService.updateUserPassword(dto, mockUser.getEmployeeId()));
     }
 }
