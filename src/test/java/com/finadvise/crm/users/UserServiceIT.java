@@ -74,7 +74,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
 
     // --- 2. UPDATE USER PROFILE ---
     @Test
-    @WithMockUser(username = "IT-ADV-1")
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
     void updateUserProfile_OptimisticLocking_IncrementsVersion() {
         User currentAdvisor = userRepository.findByEmployeeId(testAdvisor1.getEmployeeId()).orElseThrow();
         Integer initialVersion = currentAdvisor.getVersion();
@@ -97,7 +97,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "IT-ADV-1")
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
     void updateUserProfile_StaleData_ThrowsException() {
         User currentAdvisor = userRepository.findByEmployeeId(testAdvisor1.getEmployeeId()).orElseThrow();
 
@@ -111,7 +111,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "IT-ADV-1")
+    @WithMockUser(username = "IT-ADV-1", authorities = "ADVISOR")
     void updateUserProfile_DuplicitIco_ThrowsException() {
         User currentAdvisor = userRepository.findByEmployeeId(testAdvisor1.getEmployeeId()).orElseThrow();
 
@@ -125,7 +125,7 @@ public class UserServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "IT-ADV-3")
+    @WithMockUser(username = "IT-ADV-3", authorities = "ADVISOR")
     void updateUserProfile_UserMissing_ThrowsException() {
         UserUpdateDTO updateDTO = new UserUpdateDTO(
                 0, "12345678", "UpdatedFirst", "UpdatedLast", "+420000111222", "update@finadvise.com"

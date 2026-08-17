@@ -37,7 +37,7 @@ class UserService implements UserReadFacade{
         return userMapper.toContactDto(admin);
     }
 
-    @PreAuthorize("#employeeId == authentication.name")
+    @PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN') and #employeeId == authentication.name")
     @Transactional(readOnly = true)
     public UserProfileDTO getUserProfile(String employeeId) {
         User user = userRepository.findByEmployeeId(employeeId).orElseThrow(
@@ -56,7 +56,7 @@ class UserService implements UserReadFacade{
         return userMapper.toProfileDto(user, advisorStats);
     }
 
-    @PreAuthorize("#employeeId == authentication.name")
+    @PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN') and #employeeId == authentication.name")
     @Transactional
     public UserProfileDTO updateUserProfile(String employeeId, UserUpdateDTO dto) {
         User user = userRepository.findByEmployeeId(employeeId).orElseThrow(
@@ -90,7 +90,7 @@ class UserService implements UserReadFacade{
         return userMapper.toProfileDto(userRepository.saveAndFlush(user), advisorStats);
     }
 
-    @PreAuthorize("#employeeId == authentication.name")
+    @PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN') and #employeeId == authentication.name")
     @Transactional
     public UserProfileDTO updateUserPassword(PasswordChangeDTO dto, String employeeId) {
         if (Objects.equals(dto.newPassword(), dto.currentPassword())) {

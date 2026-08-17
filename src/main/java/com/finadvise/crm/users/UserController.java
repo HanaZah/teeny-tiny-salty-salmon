@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -12,6 +13,7 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ADVISOR', 'ADMIN')")
 public class UserController {
     private final UserService userService;
 
