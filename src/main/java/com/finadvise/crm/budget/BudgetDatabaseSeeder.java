@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Order(30)
 public class BudgetDatabaseSeeder implements CommandLineRunner {
     private final IncomeTypeRepository incomeTypeRepository;
     private final ExpenseTypeRepository expenseTypeRepository;
